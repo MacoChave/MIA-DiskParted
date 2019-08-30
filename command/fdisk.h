@@ -477,7 +477,11 @@ void exec_fdisk()
     strcat(raid, "_ra1.");
     strcat(raid, getTypeFilename(values.path));
 
-    if (values.unit == 'k')
+    if (values.unit == 'b')
+    {
+
+    }
+    else if (values.unit == 'k')
     {
         values.size *= 1024;
         values.add *= 1024;
@@ -492,6 +496,9 @@ void exec_fdisk()
         values.size *= 1024;
         values.add *= 1024;
     }
+
+    // TODO: VALIDAR FIT POR DEFECTO
+    values.fit = (values.fit == '0') ? 'w' : values.fit;
 
     if (strcmp(values.del, "full") == 0 || strcmp(values.del, "fast") == 0) deletePart();
     else if (values.add != 0) modifyPart();

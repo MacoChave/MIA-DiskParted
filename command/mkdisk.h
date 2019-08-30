@@ -73,7 +73,8 @@ void exec_mkdisk()
 
     mbr.mbr_disk_signature = 2010;
     mbr.size = values.size;
-    mbr.fit = 'f';
+    // TODO: TOMAR EL FIT RECONOCIDO O EL POR DEFECTO
+    mbr.fit = (values.fit == '0') ? 'p' : values.fit;
     for (int i = 0; i < 4; i++)
     {
         mbr.partitions[i].part_status ='0';
