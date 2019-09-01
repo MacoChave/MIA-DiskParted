@@ -5,6 +5,13 @@ typedef struct Partition Partition;
 typedef struct MBR MBR;
 typedef struct EBR EBR;
 
+typedef struct Superblock SuperBlock;
+typedef struct Inode Inode;
+typedef struct DirectoryBlock DirectoryBlock;
+typedef struct ContentDirectory ContentDirectory;
+typedef struct FileBlock FileBlock;
+typedef struct PointerBlock PointerBlock;
+
 typedef struct Mount Mount;
 typedef struct PartMount PartMount;
 
@@ -38,6 +45,61 @@ struct EBR
     int part_size;
     int part_next;
     char ebr_name[16];
+};
+
+struct SuperBlock
+{
+    int filesystem;
+    int inodes_count;
+    int blocks_count;
+    int free_blocks;
+    int free_inodes;
+    char mounted_date[16];
+    char unmounted_date[16];
+    int mounting_count;
+    int magic;
+    int inode_size;
+    int block_size;
+    int first_inode;
+    int first_block;
+    int bm_inode_start;
+    int bm_block_start;
+    int inode_start;
+    int block_start;
+};
+
+struct Inode
+{
+    int uid;
+    int gid;
+    int size;
+    char last_date[16];
+    char create_date[16];
+    char modified_date[16];
+    int block[15];
+    char type;
+    int permission;
+};
+
+struct ContentDirectory
+{
+    char name[12];
+    int inode;
+};
+
+struct DirectoryBlock
+{
+    ContentDirectory content[4];
+};
+
+struct FileBlock
+{
+    char content[64];
+};
+
+struct PointerBlock
+{
+    int pointers[16];
 };
 
 struct PartMount
