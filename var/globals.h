@@ -17,6 +17,27 @@
 #define _UNMOUNT_ 5
 #define _REP_ 6
 #define _PAUSE_ 7
+#define _MKFS_ 8
+#define _LOGIN_ 9
+#define _LOGOUT_ 10
+#define _MKGRP_ 11
+#define _RMGRP_ 12
+#define _MKUSR_ 13
+#define _RMUSR_ 14
+#define _CHMOD_ 15
+#define _MKFILE_ 16
+#define _CAT_ 17
+#define _REM_ 18
+#define _EDIT_ 19
+#define _REN_ 20
+#define _MKDIR_ 21
+#define _CP_ 22
+#define _MV_ 23
+#define _FIND_ 24
+#define _CHOWN_ 25
+#define _CHGRP_ 26
+#define _RECOVERY_ 27
+#define _LOSS_ 28
 
 /* TIPO DE PARAMETRO */
 #define _SIZE_ 0
@@ -28,6 +49,16 @@
 #define _DELETE_ 6
 #define _ADD_ 7
 #define _ID_ 8
+#define _FS_ 9
+#define _USR_ 10
+#define _PWD_ 11
+#define _GRP_ 12
+#define _UGO_ 13
+#define _R_ 14
+#define _CONT_ 15
+#define _FILE_ 16
+#define _DEST_ 17
+#define _RUTA_ 18
 
 #define _ERROR_ -2
 #define _COMMAND_ 0
