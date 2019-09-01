@@ -11,6 +11,7 @@ typedef struct DirectoryBlock DirectoryBlock;
 typedef struct ContentDirectory ContentDirectory;
 typedef struct FileBlock FileBlock;
 typedef struct PointerBlock PointerBlock;
+typedef struct Journal Journal;
 
 typedef struct Mount Mount;
 typedef struct PartMount PartMount;
@@ -18,6 +19,9 @@ typedef struct PartMount PartMount;
 typedef struct Values Values;
 typedef struct SpaceDisk SpaceDisk;
 
+/**
+ * DISCO VIRTUAL Y SUS PARTICIONES
+ * */
 struct Partition 
 {
     char part_status;
@@ -47,6 +51,11 @@ struct EBR
     char ebr_name[16];
 };
 
+/**
+ * SISTEMA DE ARCHIVOS
+ * DD/MM/YY HH:MM:SS
+ * */
+/* 92 */
 struct SuperBlock
 {
     int filesystem;
@@ -68,6 +77,7 @@ struct SuperBlock
     int block_start;
 };
 
+/* 80 */
 struct Inode
 {
     int uid;
@@ -87,21 +97,41 @@ struct ContentDirectory
     int inode;
 };
 
+/* 64 */
 struct DirectoryBlock
 {
     ContentDirectory content[4];
 };
 
+/* 64 */
 struct FileBlock
 {
     char content[64];
 };
 
+/* 64 */
 struct PointerBlock
 {
     int pointers[16];
 };
 
+/* 242 */
+struct Journal
+{
+    char path_1[100];
+    char path_2[100];
+    char usr[10];
+    char pwd[10];
+    char grp[10];
+    char ugo[3];
+    char recursive;
+    int command;
+    int size;
+};
+
+/**
+ * MONTAJE DE PARTICIONES
+ * */
 struct PartMount
 {
     char mount_type;
@@ -118,19 +148,6 @@ struct Mount
     PartMount parts_mount[30];
 };
 
-struct Values
-{
-    char path[300];
-    char del[300];
-    char name[300];
-    char id[300];
-    char fit;
-    char unit;
-    char type;
-    int size;
-    int add;
-};
-
 struct SpaceDisk
 {
     int start;
@@ -138,6 +155,32 @@ struct SpaceDisk
     char type;
     int next;
     int prev;
+};
+
+/**
+ * VALORES DE COMANDOS
+ * */
+struct Values
+{
+    char path[300];
+    char del[300];
+    char name[300];
+    char id[300];
+    char cont[300];
+    char file[300];
+    char dest[300];
+    char ruta[300];
+    char usr[10];
+    char pwd[10];
+    char grp[10];
+    char ugo[3];
+    char fit;
+    char unit;
+    char type;
+    char fs;
+    int size;
+    int add;
+    int recursive;
 };
 
 #endif

@@ -99,11 +99,21 @@ void clearValues()
     memset(values.del, 0, 300);
     memset(values.name, 0, 300);
     memset(values.id, 0, 300);
+    memset(values.cont, 0, 300);
+    memset(values.file, 0, 300);
+    memset(values.dest, 0, 300);
+    memset(values.ruta, 0, 300);
+    memset(values.usr, 0, 10);
+    memset(values.pwd, 0, 10);
+    memset(values.grp, 0, 10);
+    memset(values.ugo, 0, 3);
     values.fit = '0';
     values.unit = '0';
     values.type = '0';
+    values.fs = '2';
     values.size = 0;
     values.add = 0;
+    values.recursive = -1;
     command = -1;
 }
 
