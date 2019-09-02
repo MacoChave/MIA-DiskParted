@@ -5,7 +5,7 @@ typedef struct Partition Partition;
 typedef struct MBR MBR;
 typedef struct EBR EBR;
 
-typedef struct Superblock SuperBlock;
+typedef struct SuperBlock SuperBlock;
 typedef struct Inode Inode;
 typedef struct DirectoryBlock DirectoryBlock;
 typedef struct ContentDirectory ContentDirectory;
@@ -51,11 +51,6 @@ struct EBR
     char ebr_name[16];
 };
 
-/**
- * SISTEMA DE ARCHIVOS
- * DD/MM/YY HH:MM:SS
- * */
-/* 92 */
 struct SuperBlock
 {
     int filesystem;
@@ -76,6 +71,7 @@ struct SuperBlock
     int inode_start;
     int block_start;
 };
+
 
 /* 80 */
 struct Inode

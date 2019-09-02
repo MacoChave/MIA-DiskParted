@@ -67,4 +67,7 @@ dkms.conf
 # Ignore all local history of files
 .history
 
+## Todos los reportes generados
+*.dot
+
 # End of https://www.gitignore.io/api/c,visualstudiocode

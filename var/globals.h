@@ -145,7 +145,7 @@ void clearAllPartMounted (int i)
 
 SuperBlock * newSuperBlock()
 {
-    SuperBlock * sb = (SuperBlock *) malloc(sizeof(SuperBlock));
+    SuperBlock * sb = (SuperBlock *) calloc(1, sizeof(SuperBlock));
     return sb;
 }
 

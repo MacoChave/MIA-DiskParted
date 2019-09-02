@@ -164,6 +164,7 @@ void exec_mount()
     MBR mbr = getMBR(values.path);
 
     mounting(mbr);
+    showMountedPartition();
 }
 
 #endif
