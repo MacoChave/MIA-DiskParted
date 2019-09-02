@@ -128,7 +128,6 @@ void clearDiskMounted (int i)
     memset(disks_mount[i].path, 0, 300);
 }
 
-
 void clearPartMounted (int i, int j)
 {
     disks_mount[i].parts_mount[j].mount_type = '0';
@@ -143,4 +142,41 @@ void clearAllPartMounted (int i)
     for (int j = 0; j < 30; j++)
         clearPartMounted(i, j);    
 }
+
+SuperBlock * newSuperBlock()
+{
+    SuperBlock * sb = (SuperBlock *) malloc(sizeof(SuperBlock));
+    return sb;
+}
+
+Inode * newInode()
+{
+    Inode * in = (Inode *) calloc(1, sizeof(Inode));
+    return in;
+}
+
+DirectoryBlock * newDirectoryBlock()
+{
+    DirectoryBlock * db = (DirectoryBlock *) calloc(1, sizeof(DirectoryBlock));
+    return db;
+}
+
+FileBlock * newFileBlock()
+{
+    FileBlock * fb = (FileBlock *) calloc(1, sizeof(FileBlock));
+    return fb;
+}
+
+PointerBlock * newPointerBlock()
+{
+    PointerBlock * pb = (PointerBlock *) calloc(1, sizeof(PointerBlock));
+    return pb;
+}
+
+Journal * newJournal()
+{
+    Journal * journal = (Journal *) calloc(1, sizeof(Journal));
+    return journal;
+}
+
 #endif
