@@ -233,4 +233,227 @@ EBR getEBR (char path[], int start)
     return ebr;
 }
 
+int updateSuperBlock(char path[], SuperBlock * sb, int start)
+{
+    FILE * file;
+    file = fopen(path, "rb+");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fwrite(sb, sizeof(SuperBlock), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+SuperBlock * getSuperBlock(char path[], int start)
+{
+    SuperBlock * sb = newSuperBlock();
+    FILE * file;
+    file = fopen(path, "rb");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fread(sb, sizeof(SuperBlock), 1, file);
+        fclose(file);
+
+        return sb;
+    }
+
+    return sb;
+}
+
+int updateInode(char path[], Inode * in, int start)
+{
+    FILE * file;
+    file = fopen(path, "rb+");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fwrite(in, sizeof(Inode), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+Inode * getInode(char path[], int start)
+{
+    Inode * in = newInode(_DIRECTORY_TYPE_);
+    FILE * file;
+    file = fopen(path, "rb");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fread(in, sizeof(Inode), 1, file);
+        fclose(file);
+
+        return in;
+    }
+
+    return in;
+}
+
+int updateGenericBlock(char path[], void * block, int start)
+{
+    FILE * file;
+    file = fopen(path, "rb+");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fwrite(block, sizeof(DirectoryBlock), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+void * getGenericBlock(char path[], int type, int start)
+{
+    void * block = NULL;
+
+    switch(type)
+    {
+        case _DIRECTORY_TYPE_:
+            block = newDirectoryBlock();
+            break;
+        case _FILE_TYPE_:
+            block = newFileBlock();
+            break;
+        case _POINTER_TYPE_:
+            block = newPointerBlock();
+            break;
+    }
+
+    FILE * file;
+    file = fopen(path, "rb");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fread(block, sizeof(DirectoryBlock), 1, file);
+        fclose(file);
+
+        return block;
+    }
+
+    return block;
+}
+
+int clearJournals(char path[], int start, int count)
+{
+    FILE * file;
+    file = fopen(path, "rb+");
+
+    if (file != NULL)
+    {
+        Journal * jounal = newJournal();
+        fseek(file, start, SEEK_SET);
+        for (int i = start; i < count; i++)
+        {
+            fwrite(jounal, sizeof(Journal), 1, file);
+            fclose(file);
+        }
+        return 1;
+    }
+
+    return 0;
+}
+
+int updateJournal(char path[], Journal * j, int start)
+{
+    FILE * file;
+    file = fopen(path, "rb+");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fwrite(j, sizeof(Journal), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+Journal * getJournal(char path[], int start)
+{
+    Journal * journal = newJournal();
+    FILE * file;
+    file = fopen(path, "rb");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fread(journal, sizeof(Journal), 1, file);
+        fclose(file);
+
+        return journal;
+    }
+
+    return journal;
+}
+
+int clearBitmaps(char path[], int start, int count)
+{
+    FILE * file;
+    file = fopen(path, "rb+");
+
+    if (file != NULL)
+    {
+        char state = (char *) calloc(1024, sizeof(char));
+        fseek(file, start, SEEK_SET);
+
+        for (int i = start; i < count; i++)
+        {
+            fwrite(state, sizeof(char), 1024, file);
+            fclose(file);
+        }
+        return 1;
+    }
+    return 0;
+}
+
+int updateBitmap(char path[], char state, int start)
+{
+    FILE * file;
+    file = fopen(path, "rb+");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fwrite(state, sizeof(char), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+char getBitmap(char path[], int start)
+{
+    char state = '0';
+    FILE * file;
+    file = fopen(path, "rb");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fread(state, sizeof(char), 1, file);
+        fclose(file);
+
+        return state;
+    }
+
+    return state;
+}
 #endif

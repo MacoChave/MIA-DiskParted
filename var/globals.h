@@ -60,10 +60,16 @@
 #define _DEST_ 17
 #define _RUTA_ 18
 
+/* AUXILIARES PARA INTERPRETE */
 #define _ERROR_ -2
 #define _COMMAND_ 0
 #define _PARAM_ 1
 #define _VALUE_ 2
+
+/* AUXILIARES PARA SISTEMA DE ARCHIVOS */
+#define _DIRECTORY_TYPE_ 0
+#define _FILE_TYPE_ 1
+#define _POINTER_TYPE_ 2
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -149,9 +155,10 @@ SuperBlock * newSuperBlock()
     return sb;
 }
 
-Inode * newInode()
+Inode * newInode(int type)
 {
     Inode * in = (Inode *) calloc(1, sizeof(Inode));
+    in->type = type;
     return in;
 }
 

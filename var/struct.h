@@ -51,6 +51,9 @@ struct EBR
     char ebr_name[16];
 };
 
+/**
+ * ESTRUCTURAS PARA EL SISTEMA DE ARCHIVOS
+ * */
 struct SuperBlock
 {
     int filesystem;
@@ -71,7 +74,6 @@ struct SuperBlock
     int inode_start;
     int block_start;
 };
-
 
 /* 80 */
 struct Inode
