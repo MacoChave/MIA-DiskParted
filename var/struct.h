@@ -5,6 +5,9 @@ typedef struct Partition Partition;
 typedef struct MBR MBR;
 typedef struct EBR EBR;
 
+typedef struct Mount Mount;
+typedef struct PartMount PartMount;
+
 typedef struct SuperBlock SuperBlock;
 typedef struct Inode Inode;
 typedef struct DirectoryBlock DirectoryBlock;
@@ -13,11 +16,12 @@ typedef struct FileBlock FileBlock;
 typedef struct PointerBlock PointerBlock;
 typedef struct Journal Journal;
 
-typedef struct Mount Mount;
-typedef struct PartMount PartMount;
-
 typedef struct Values Values;
 typedef struct SpaceDisk SpaceDisk;
+
+typedef struct Permission Permission;
+typedef struct Session Session;
+
 
 /**
  * DISCO VIRTUAL Y SUS PARTICIONES
@@ -52,6 +56,25 @@ struct EBR
 };
 
 /**
+ * MONTAJE DE PARTICIONES
+ * */
+struct PartMount
+{
+    char mount_type;
+    int mount_start;
+    int mount_size;
+    int mount_id;
+    char mount_name[16];
+};
+
+struct Mount
+{
+    char path[300];
+    char letter;
+    PartMount parts_mount[30];
+};
+
+/**
  * ESTRUCTURAS PARA EL SISTEMA DE ARCHIVOS
  * */
 struct SuperBlock
@@ -64,7 +87,7 @@ struct SuperBlock
     char mounted_date[16];
     char unmounted_date[16];
     int mounting_count;
-    int magic;
+    int magic; //0xEF53
     int inode_size;
     int block_size;
     int first_inode;
@@ -116,43 +139,13 @@ struct PointerBlock
 /* 242 */
 struct Journal
 {
-    char path_1[100];
-    char path_2[100];
-    char usr[10];
-    char pwd[10];
-    char grp[10];
+    char str_1[200];
+    char str_2[200];
+    char date[16];
     char ugo[3];
-    char recursive;
+    int owner;
     int command;
     int size;
-};
-
-/**
- * MONTAJE DE PARTICIONES
- * */
-struct PartMount
-{
-    char mount_type;
-    int mount_start;
-    int mount_size;
-    int mount_id;
-    char mount_name[16];
-};
-
-struct Mount
-{
-    char path[300];
-    char letter;
-    PartMount parts_mount[30];
-};
-
-struct SpaceDisk
-{
-    int start;
-    int space;
-    char type;
-    int next;
-    int prev;
 };
 
 /**
@@ -179,6 +172,33 @@ struct Values
     int size;
     int add;
     int recursive;
+};
+
+struct SpaceDisk
+{
+    int start;
+    int space;
+    char type;
+    int next;
+    int prev;
+};
+
+struct Permission
+{
+    int id;
+    char type;
+    char group[10];
+    char name[10];
+    char pass[10];
+};
+
+struct Session
+{
+    int id_user;
+    int id_group;
+    int part_start;
+    char path[300];
+    SuperBlock * sb;
 };
 
 #endif

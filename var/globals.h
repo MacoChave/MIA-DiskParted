@@ -61,6 +61,7 @@
 #define _RUTA_ 18
 
 /* AUXILIARES PARA INTERPRETE */
+#define _EMPTY_ -3
 #define _ERROR_ -2
 #define _COMMAND_ 0
 #define _PARAM_ 1
@@ -70,6 +71,8 @@
 #define _DIRECTORY_TYPE_ 0
 #define _FILE_TYPE_ 1
 #define _POINTER_TYPE_ 2
+#define _INODE_ 3
+#define _BLOCK_ 4
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -79,6 +82,8 @@
 
 Mount disks_mount[10];
 Values values;
+Permission permissions[20];
+Session session;
 int command;
 
 void initDisksMount()
@@ -97,6 +102,27 @@ void initDisksMount()
             memset(disks_mount[i].parts_mount[j].mount_name, 0, 16);
         }
     }
+}
+
+void initPermissionlist()
+{
+    for (int i = 0; i < 20; i++)
+    {
+        permissions[i].id = 0;
+        permissions[i].type = '0';
+        memset(permissions[i].group, 0, 10);
+        memset(permissions[i].name, 0, 10);
+        memset(permissions[i].pass, 0, 10);
+    }    
+}
+
+void initSession()
+{
+    session.id_user = -1;
+    session.id_group = -1;
+    session.part_start = -1;
+    memset(session.path, 0, 300);
+    session.sb = NULL;
 }
 
 void clearValues()
@@ -158,13 +184,36 @@ SuperBlock * newSuperBlock()
 Inode * newInode(int type)
 {
     Inode * in = (Inode *) calloc(1, sizeof(Inode));
+    in->uid = permissions[session.id_user].id;
+    in->gid = permissions[session.id_group].id;
+    in->permission = 664;
     in->type = type;
+
+    __time_t currentDate = time(NULL);
+    struct tm * date = localtime(&currentDate);
+    strftime(in->create_date, sizeof(in->create_date) - 1, "%d/%m/%y %H:%M", date);
+    strftime(in->modified_date, sizeof(in->modified_date) - 1, "%d/%m/%y %H:%M", date);
+    strftime(in->last_date, sizeof(in->last_date) - 1, "%d/%m/%y %H:%M", date);
+
     return in;
 }
 
-DirectoryBlock * newDirectoryBlock()
+DirectoryBlock * newDirectoryBlock(int current, int upper)
 {
     DirectoryBlock * db = (DirectoryBlock *) calloc(1, sizeof(DirectoryBlock));
+
+    for (int i = 0; i < 4; i++)
+        db->content[i].inode = -1;
+    
+    if (current != _EMPTY_) {
+        db->content[0].inode = current;
+        strcpy(db->content[0].name, ".");
+    }
+    if (upper != _EMPTY_) {
+        db->content[0].inode = upper;
+        strcpy(db->content[0].name, "..");
+    }
+
     return db;
 }
 
@@ -177,12 +226,18 @@ FileBlock * newFileBlock()
 PointerBlock * newPointerBlock()
 {
     PointerBlock * pb = (PointerBlock *) calloc(1, sizeof(PointerBlock));
+
+    for (int i = 0; i < 16; i++)
+        pb->pointers[i] = -1;
+    
     return pb;
 }
 
 Journal * newJournal()
 {
     Journal * journal = (Journal *) calloc(1, sizeof(Journal));
+    journal->command = _EMPTY_;
+    journal->owner = session.id_user;
     return journal;
 }
 
