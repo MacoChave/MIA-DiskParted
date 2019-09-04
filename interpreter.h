@@ -65,13 +65,21 @@ int loadCommand(char input[])
         }
         if (isupper(input[i]))
         {
-            if (!quotation_marks && param != _PATH_ && param != _NAME_)
+            if (!quotation_marks && 
+                param != _PATH_ && 
+                param != _NAME_ &&
+                param != _USR_ &&
+                param != _PWD_ &&
+                param != _GRP_ &&
+                param != _CONT_ &&
+                param != _DEST_ &&
+                param != _RUTA_)
                 input[i] = tolower(input[i]);
         }
 
         char current_char[2] = {input[i], '\0'};
 
-        if (step == 0) // OBTENER TIPO COMANDO
+        if (step == _COMMAND_) // OBTENER TIPO COMANDO
         {
             if (input[i] != ' ')
             {
@@ -99,6 +107,48 @@ int loadCommand(char input[])
                     command = _EXEC_;
                 else if (strcasecmp(auxiliar, "pause") == 0)
                     command = _PAUSE_;
+                else if (strcasecmp(auxiliar, "mkfs") == 0)
+                    command = _MKFS_;
+                else if (strcasecmp(auxiliar, "login") == 0)
+                    command = _LOGIN_;
+                else if (strcasecmp(auxiliar, "logout") == 0)
+                    command = _LOGOUT_;
+                else if (strcasecmp(auxiliar, "mkgrp") == 0)
+                    command = _MKGRP_;
+                else if (strcasecmp(auxiliar, "rmgrp") == 0)
+                    command = _RMGRP_;
+                else if (strcasecmp(auxiliar, "mkusr") == 0)
+                    command = _MKUSR_;
+                else if (strcasecmp(auxiliar, "rmusr") == 0)
+                    command = _RMUSR_;
+                else if (strcasecmp(auxiliar, "chmod") == 0)
+                    command = _CHMOD_;
+                else if (strcasecmp(auxiliar, "mkfile") == 0)
+                    command = _MKFILE_;
+                else if (strcasecmp(auxiliar, "cat") == 0)
+                    command = _CAT_;
+                else if (strcasecmp(auxiliar, "rem") == 0)
+                    command = _REM_;
+                else if (strcasecmp(auxiliar, "edit") == 0)
+                    command = _EDIT_;
+                else if (strcasecmp(auxiliar, "ren") == 0)
+                    command = _REN_;
+                else if (strcasecmp(auxiliar, "mkdir") == 0)
+                    command = _MKDIR_;
+                else if (strcasecmp(auxiliar, "cp") == 0)
+                    command = _CP_;
+                else if (strcasecmp(auxiliar, "mv") == 0)
+                    command = _MV_;
+                else if (strcasecmp(auxiliar, "find") == 0)
+                    command = _FIND_;
+                else if (strcasecmp(auxiliar, "chown") == 0)
+                    command = _CHOWN_;
+                else if (strcasecmp(auxiliar, "chgrp") == 0)
+                    command = _CHGRP_;
+                else if (strcasecmp(auxiliar, "recovery") == 0)
+                    command = _RECOVERY_;
+                else if (strcasecmp(auxiliar, "loss") == 0)
+                    command = _LOSS_;
                 else
                 {
                     clearValues();
@@ -112,7 +162,7 @@ int loadCommand(char input[])
                 continue;
             }
         }
-        else if (step == 1) // OBTENER TIPO PARAMETRO
+        else if (step == _PARAM_) // OBTENER TIPO PARAMETRO
         {
             if (input[i] != '=')
             {
@@ -140,6 +190,26 @@ int loadCommand(char input[])
                     param = _ADD_;
                 else if (strcasecmp(auxiliar, "id") == 0)
                     param = _ID_;
+                else if (strcasecmp(auxiliar, "fs") == 0)
+                    param = _FS_;
+                else if (strcasecmp(auxiliar, "pwd") == 0)
+                    param = _PWD_;
+                else if (strcasecmp(auxiliar, "usr") == 0)
+                    param = _USR_;
+                else if (strcasecmp(auxiliar, "grp") == 0)
+                    param = _GRP_;
+                else if (strcasecmp(auxiliar, "ugo") == 0)
+                    param = _UGO_;
+                else if (strcasecmp(auxiliar, "r") == 0)
+                    values.recursive = 1;
+                else if (strcasecmp(auxiliar, "p") == 0)
+                    values.recursive = 1;
+                else if (strcasecmp(auxiliar, "cont") == 0)
+                    param == _CONT_;
+                else if (strcasecmp(auxiliar, "file") == 0)
+                    param == _FILE_;
+                else if (strcasecmp(auxiliar, "dest") == 0)
+                    param == _DEST_;
                 else
                     printf(ANSI_COLOR_RED "[e] Parámetro %s no reconocido\n" ANSI_COLOR_RESET, auxiliar);
                 
@@ -149,7 +219,7 @@ int loadCommand(char input[])
                 continue;
             }
         }
-        else if (step == 2) // OBTENER VALOR PARAMETRO
+        else if (step == _VALUE_) // OBTENER VALOR PARAMETRO
         {
             if (input[i] == '"')
             {
@@ -201,6 +271,30 @@ int loadCommand(char input[])
                     case _ID_:
                         strcpy(values.id, auxiliar);
                         break;
+                    case _FS_:
+                        values.fs = auxiliar[0];
+                        break;
+                    case _USR_:
+                        strncpy(values.usr, auxiliar, 10);
+                        break;
+                    case _PWD_:
+                        strncpy(values.pwd, auxiliar, 10);
+                        break;
+                    case _GRP_:
+                        strncpy(values.grp, auxiliar, 10);
+                        break;
+                    case _UGO_:
+                        strncpy(values.ugo, auxiliar);
+                        break;
+                    case _CONT_:
+                        strncpy(values.cont, auxiliar);
+                        break;
+                    case _FILE_:
+                        strncpy(values.file, auxiliar);
+                        break;
+                    case _DEST_:
+                        strncpy(values.dest, auxiliar);
+                        break;
                     default:
                         break;
                 }
@@ -243,9 +337,31 @@ int loadCommand(char input[])
             exec_rep();
             break;
         case _PAUSE_:
-            {char conf[999] = {0};
+            char conf[999] = {0};
             fgets(conf, 999, stdin);
-            break;}
+            break;
+        case _MKFS_:
+            break;
+        case _LOGIN_:
+            break;
+        case _LOGOUT_:
+            break;
+        case _MKGRP_:
+            break;
+        case _MKUSR_:
+            break;
+        case _RMGRP_:
+            break;
+        case _RMUSR_:
+            break;
+        case _MKDIR_:
+            break;
+        case _MKFILE_:
+            break;
+        case _LOSS_:
+            break;
+        case _RECOVERY_:
+            break;
         default:
             return _ERROR_;
             break;
