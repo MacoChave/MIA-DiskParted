@@ -1,7 +1,7 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
-#include "../var/globals.h";
+#include "../var/globals.h"
 
 Inode * createUsersFile()
 {

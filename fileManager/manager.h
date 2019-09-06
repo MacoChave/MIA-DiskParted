@@ -307,7 +307,7 @@ Inode * getInode(int n)
     return in;
 }
 
-int updateGenericBlock(int n, void * block, int type)
+int updateGenericBlock(int n, void * block)
 {
     n = (n == _EMPTY_) ? 
         session.sb->first_block : n;
@@ -412,30 +412,6 @@ Journal * getJournal(int start)
     }
 
     return journal;
-}
-
-int clearBitmaps(int n, int type, int count)
-{
-    int start = (type == _BLOCK_) ? 
-        session.sb->bm_block_start + n : 
-        session.sb->bm_inode_start + n;
-    
-    FILE * file;
-    file = fopen(session.path, "rb+");
-
-    if (file != NULL)
-    {
-        char * state = (char *) calloc(1024, sizeof(char));
-        fseek(file, start, SEEK_SET);
-
-        for (int i = 0; i < count; i+=1024)
-        {
-            fwrite(state, sizeof(char), 1024, file);
-            fclose(file);
-        }
-        return 1;
-    }
-    return 0;
 }
 
 int updateBitmap(int n, char state, int type)

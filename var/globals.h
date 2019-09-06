@@ -146,7 +146,7 @@ void clearValues()
     values.size = 0;
     values.add = 0;
     values.recursive = -1;
-    command = -1;
+    // command = -1;
 }
 
 void clearDiskMounted (int i)
