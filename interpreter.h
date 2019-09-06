@@ -284,16 +284,16 @@ int loadCommand(char input[])
                         strncpy(values.grp, auxiliar, 10);
                         break;
                     case _UGO_:
-                        strncpy(values.ugo, auxiliar);
+                        strcpy(values.ugo, auxiliar);
                         break;
                     case _CONT_:
-                        strncpy(values.cont, auxiliar);
+                        strcpy(values.cont, auxiliar);
                         break;
                     case _FILE_:
-                        strncpy(values.file, auxiliar);
+                        strcpy(values.file, auxiliar);
                         break;
                     case _DEST_:
-                        strncpy(values.dest, auxiliar);
+                        strcpy(values.dest, auxiliar);
                         break;
                     default:
                         break;
@@ -313,7 +313,7 @@ int loadCommand(char input[])
     switch (command)
     {
         case _EXIT_:
-            return _EXIT_;
+            command = _EXIT_;
             break;
         case _EXEC_:
             exec_exec();
@@ -337,9 +337,11 @@ int loadCommand(char input[])
             exec_rep();
             break;
         case _PAUSE_:
+        {
             char conf[999] = {0};
             fgets(conf, 999, stdin);
             break;
+        }
         case _MKFS_:
             break;
         case _LOGIN_:
@@ -363,10 +365,11 @@ int loadCommand(char input[])
         case _RECOVERY_:
             break;
         default:
-            return _ERROR_;
+            command = _ERROR_;
             break;
     }
     clearValues();
+    return command;
 }
 
 /**
