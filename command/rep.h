@@ -328,6 +328,46 @@ void reportMBR (MBR mbr, char path_disk[])
     system(cmd);
 }
 
+void reportInodes()
+{
+
+}
+
+void reportBlocks()
+{
+
+}
+
+void reportBitmap(char type)
+{
+
+}
+
+void reportTree()
+{
+
+}
+
+void reportSuperBlock()
+{
+
+}
+
+void reportFile()
+{
+
+}
+
+void reportLs()
+{
+
+}
+
+void reportJournal()
+{
+
+}
+
 /**
  * @brief Genera el reporte indicado
  * 
@@ -364,11 +404,62 @@ void exec_rep ()
     EBR ebr = getEBR(disks_mount[i].path, mbr.partitions[i_ext].part_start);
     getSpaceLogicalDetail(disks_mount[i].path, ebr, mbr.partitions[i_ext].part_start + mbr.partitions[i_ext].part_size);
 
+    /* REPORTES DE FASE 1 */
     if (strcmp(values.name, "disk") == 0)
         reportDisk(mbr, disks_mount[i].path);
     else if (strcmp(values.name, "mbr") == 0)
+    {
         reportMBR(mbr, disks_mount[i].path);
+        clearSpaceDisk();
+        return;
+    }
     
+    /* REPORTES DE FASE 2 */
+    if (session.id_group != 1)
+    {
+        printf(ANSI_COLOR_RED "[e] Inicie sesión como root para generear el reporte\n" ANSI_COLOR_RESET);
+        return;
+    }
+
+    Partition  part;
+    int a;
+    for (a = 0; a < 4; a++)
+    {
+        if (mbr.partitions[a].part_type == 'p')
+        {
+            if (strcmp(mbr.partitions[a].part_name, disks_mount[i].parts_mount[j].mount_name) == 0)
+            {
+                part = mbr.partitions[a];
+                break;
+            }
+        }
+    }
+    
+    if (i == 4) return;
+    // strcpy(session.path, disks_mount[i].path);
+    // session.part_start = part.part_start;
+    // SuperBlock * sb = getSuperBlock();
+    // session.sb = sb;
+
+    if (strcmp(values.name, "inode") == 0)
+        reportInodes();
+    else if (strcmp(values.name, "block") == 0)
+        reportBlocks();
+    else if (strcmp(values.name, "bm_inode") == 0)
+        reportBitmap(_INODE_);
+    else if (strcmp(values.name, "bm_block") == 0)
+        reportBitmap(_BLOCK_);
+    else if (strcmp(values.name, "tree") == 0)
+        reportTree();
+    else if (strcmp(values.name, "sb") == 0)
+        reportSuperBlock();
+    else if (strcmp(values.name, "file") == 0)
+        reportFile();
+    else if (strcmp(values.name, "ls") == 0)
+        reportLs();
+    else if (strcmp(values.name, "journaling") == 0)
+        reportJournal();
+
     clearSpaceDisk();
 }
 
