@@ -6,7 +6,59 @@
 /**
  * LEER ARCHIVO DE TEXTO
  * */
+char * fs_readFile_Indirect(PointerBlock * current, int level)
+{
+    char * text = (char *)calloc(279552, sizeof(char));
 
+    for (int i = 0; i < 16; i++)
+    {
+        if (level > 1)
+        {
+            if (current->pointers[i] == -1) continue;
+
+            PointerBlock * pb = (PointerBlock *) getGenericBlock(current->pointers[i], _POINTER_TYPE_);
+            strcat(text, fs_readFile_Indirect(pb, level -1);
+        }
+        else 
+        {
+            if (current->pointers[i] == -1) continue;
+
+            FileBlock * fb = (FileBlock *)getGenericBlock(current->pointers[i], _FILE_TYPE_);
+            strcat(text, fb->content);
+        }
+    }
+    return text;
+}
+
+char * fs_readFile(Inode * current)
+{
+    int level = 1;
+    char * text = (char *)calloc(280320, sizeof(char));
+
+    for (int i = 0; i < 15; i++)
+    {
+        if (i < 12)
+        {
+            /* BLOQUES DIRECTOS */
+            if (current->block[i] == -1) continue;
+            
+            FileBlock * fb = (FileBlock *) getGenericBlock(current->block[i], _FILE_TYPE_);
+            strcat(text, fb->content);
+        }
+        else 
+        {
+            /* BLOQUES INDIRECTOS */
+            if (current->block[i] == -1) continue;
+
+            PointerBlock * pb = NULL;
+            pb = (PointerBlock *) getGenericBlock(current->block[i], _POINTER_TYPE_);
+            strcat(text, fs_readFile_Indirect(pb, level));
+
+            level++;
+        }
+    }
+    return text;
+}
 /**
  * ESCRIBIR ARCHIVO DE TEXTO
  * */
