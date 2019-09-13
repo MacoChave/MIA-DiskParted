@@ -17,7 +17,7 @@ char * fs_readFile_Indirect(PointerBlock * current, int level)
             if (current->pointers[i] == -1) continue;
 
             PointerBlock * pb = (PointerBlock *) getGenericBlock(current->pointers[i], _POINTER_TYPE_);
-            strcat(text, fs_readFile_Indirect(pb, level -1);
+            strcat(text, fs_readFile_Indirect(pb, level -1));
         }
         else 
         {

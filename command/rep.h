@@ -330,7 +330,101 @@ void reportMBR (MBR mbr, char path_disk[])
 
 void reportInodes()
 {
+    char dotfile[20] = "inodes_report.dot";
+    FILE * file;
+    file = fopen(dotfile, "w");
 
+    if (file == NULL) return;
+
+    fprintf(file, "digraph {\n");
+    fprintf(file, "\tgraph[pad=\"0.5\", nodesep=\"0.5\", ranksep=\"2\"]\n");
+    fprintf(file, "\tnode [shape = plain]\n");
+    fprintf(file, "\trankdir = TB\n");
+
+    for (int i = 0; i < session.sb->inodes_count; i++)
+    {
+        char bit = getBitmap(i, _INODE_);
+        if (bit == '0') continue;
+
+        Inode * current = getInode(i);
+        fprintf(file, "\tINODE_%d [\n", i);
+        fprintf(file, "\t\tlabel = <\n");
+        if (current->type == _FILE_TYPE_)
+            fprintf(file, "\t\t\t<table bgcolor = \"salmon3\">\n");
+        else if (current->type == _DIRECTORY_TYPE_)
+            fprintf(file, "\t\t\t<table bgcolor = \"skyblue3\">\n");
+        
+        fprintf(file, "\t\t\t\t<tr>\n");
+        fprintf(file, "\t\t\t\t\t<td colspan = \"2\">Inode %d</td>\n", i);
+        fprintf(file, "\t\t\t\t</tr>\n");
+
+        fprintf(file, "\t\t\t\t<tr>\n");
+        fprintf(file, "\t\t\t\t\t<td>UID</td>\n");
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->uid);
+        fprintf(file, "\t\t\t\t</tr>\n");
+
+        fprintf(file, "\t\t\t\t<tr>\n");
+        fprintf(file, "\t\t\t\t\t<td>GID</td>\n");
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->gid);
+        fprintf(file, "\t\t\t\t</tr>\n");
+
+        fprintf(file, "\t\t\t\t<tr>\n");
+        fprintf(file, "\t\t\t\t\t<td>Size</td>\n");
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->size);
+        fprintf(file, "\t\t\t\t</tr>\n");
+
+        fprintf(file, "\t\t\t\t<tr>\n");
+        fprintf(file, "\t\t\t\t\t<td>Readed date</td>\n");
+        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", current->last_date);
+        fprintf(file, "\t\t\t\t</tr>\n");
+
+        fprintf(file, "\t\t\t\t<tr>\n");
+        fprintf(file, "\t\t\t\t\t<td>Created date</td>\n");
+        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", current->create_date);
+        fprintf(file, "\t\t\t\t</tr>\n");
+
+        fprintf(file, "\t\t\t\t<tr>\n");
+        fprintf(file, "\t\t\t\t\t<td>Modified date</td>\n");
+        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", current->modified_date);
+        fprintf(file, "\t\t\t\t</tr>\n");
+
+        fprintf(file, "\t\t\t\t<tr>\n");
+        fprintf(file, "\t\t\t\t\t<td>Type</td>\n");
+        fprintf(file, "\t\t\t\t\t<td>%c</td>\n", current->type);
+        fprintf(file, "\t\t\t\t</tr>\n");
+
+        fprintf(file, "\t\t\t\t<tr>\n");
+        fprintf(file, "\t\t\t\t\t<td>Permission</td>\n");
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->permission);
+        fprintf(file, "\t\t\t\t</tr>\n");
+
+        for (int j = 0; j < 16; j++)
+        {
+            if (current->block[j] < 0) continue;
+            
+            fprintf(file, "\t\t\t\t<tr>\n");
+            fprintf(file, "\t\t\t\t\t<td>Pointer</td>\n");
+            fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->block[j]);
+            fprintf(file, "\t\t\t\t</tr>\n");
+        }
+
+        fprintf(file, "\t\t\t</table>\n");
+        fprintf(file, "\t\t>\n");
+        fprintf(file, "\t]\n");
+    }
+
+    fprintf(file, "}\n"); 
+    fclose(file);
+
+    char cmd[300] = {0};
+    strcpy(cmd, "dot -T");
+    strcat(cmd, getExtensionPath(values.path));
+    strcat(cmd, " ");
+    strcat(cmd, dotfile);
+    strcat(cmd, " -o ");
+    strcat(cmd, values.path);
+    printf(ANSI_COLOR_BLUE "[d] %s\n" ANSI_COLOR_RESET, cmd);
+    system(cmd);
 }
 
 void reportBlocks()

@@ -20,6 +20,7 @@
 #include "command/mount.h"
 #include "command/unmount.h"
 #include "command/rep.h"
+#include "command/mkfs.h"
 
 extern void exec_exec();
 
@@ -343,6 +344,7 @@ int loadCommand(char input[])
             break;
         }
         case _MKFS_:
+            exec_mkfs();
             break;
         case _LOGIN_:
             break;
