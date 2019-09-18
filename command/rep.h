@@ -429,7 +429,86 @@ void reportInodes()
 
 void reportBlocks()
 {
+    char dotfile[20] = "block_report.dot";
+    FILE * file;
+    file = fopen(dotfile, "w");
 
+    if (file == NULL) return;
+
+    fprintf(file, "digraph {\n");
+    fprintf(file, "\tgraph[pad=\"0.5\", nodesep=\"0.5\", ranksep=\"2\"]\n");
+    fprintf(file, "\tnode [shape = plain]\n");
+    fprintf(file, "\trankdir = TB\n");
+
+    for (int i = 0; i < session.sb->inodes_count; i++)
+    {
+        char bit = getBitmap(i, _INODE_);
+        if (bit == '0') continue;
+
+        Inode * current = getInode(i);
+        for (int j = 0; j < 15; j++)
+        {
+            if (current->block[j] < 0) continue;
+
+            if (current->type == _FILE_TYPE_)
+            {
+                FileBlock * bf = (FileBlock *) getBlock(current->block[j]);
+
+                fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
+                fprintf(file, "\t\tlabel = <\n");
+                fprintf(file, "\t\t\t<table bgcolor = \"salmon\">\n");
+                
+                fprintf(file, "\t\t\t\t<tr>\n");
+                fprintf(file, "\t\t\t\t\t<td>Block %d</td>\n", current->block[j]);
+                fprintf(file, "\t\t\t\t</tr>\n");
+
+                fprintf(file, "\t\t\t\t<tr>\n");
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bf->content);
+                fprintf(file, "\t\t\t\t</tr>\n");
+
+                fprintf(file, "\t\t\t</table>\n");
+                fprintf(file, "\t\t>\n");
+                fprintf(file, "\t]\n");
+            }
+            else if (current->type == _DIRECTORY_TYPE_)
+            {
+                DirectoryBlock * bd = (DirectoryBlock *) getBlock(current->block[j]);
+
+                fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
+                fprintf(file, "\t\tlabel = <\n");
+                fprintf(file, "\t\t\t<table bgcolor = \"skyblue\">\n");
+                
+                fprintf(file, "\t\t\t\t<tr>\n");
+                fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", current->block[j]);
+                fprintf(file, "\t\t\t\t</tr>\n");
+
+                for (int z = 0; z < 4; z++)
+                {
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bd->content[z].name);
+                    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", bd->content[z].inode);
+                    fprintf(file, "\t\t\t\t</tr>\n");
+                }
+
+                fprintf(file, "\t\t\t</table>\n");
+                fprintf(file, "\t\t>\n");
+                fprintf(file, "\t]\n");
+            }
+        }        
+    }
+
+    fprintf(file, "}\n");    
+    fclose(file);
+
+    char cmd[300] = {0};
+    strcpy(cmd, "dot -T");
+    strcat(cmd, getExtensionPath(values.path));
+    strcat(cmd, " ");
+    strcat(cmd, dotfile);
+    strcat(cmd, " -o ");
+    strcat(cmd, values.path);
+    printf(ANSI_COLOR_BLUE "[d] %s\n" ANSI_COLOR_RESET, cmd);
+    system(cmd);
 }
 
 void reportBitmap(char type)
