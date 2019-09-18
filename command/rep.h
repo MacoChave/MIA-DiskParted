@@ -699,7 +699,121 @@ void reportTree()
 
 void reportSuperBlock()
 {
+    char dotfile[25] = "superblock_report.dot";
+    FILE * file;
+    file = fopen(dotfile, "w");
 
+    if (file == NULL) return;
+
+    fprintf(file, "digraph {\n");
+    fprintf(file, "\tgraph[pad=\"0.5\", nodesep=\"0.5\", ranksep=\"2\"]\n");
+    fprintf(file, "\tnode [shape = plain]\n");
+    fprintf(file, "\trankdir = LR\n");
+
+    fprintf(file, "\tSUPERBLOCK [\n");
+    fprintf(file, "\t\tlabel = <\n");
+    fprintf(file, "\t\t\t<table bgcolor = \"darkorchid\">\n");
+    
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td colspan = \"2\">Superblock</td>\n");
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Inodes count</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->inodes_count);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Blocks count</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->blocks_count);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Free blocks</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->free_blocks);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Free inodes</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->free_inodes);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Mounted date</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%s</td>\n", session.sb->mounted_date);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Unmounted date</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%s</td>\n", session.sb->unmounted_date);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Mounted count</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->blocks_count);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Magic</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->magic);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Inode size</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->inode_size);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Block size</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->block_size);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>First inode</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->first_inode);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>First block</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->first_block);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Bitmap inode start</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->bm_inode_start);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Bitmap block start</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->bm_block_start);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Inode start</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->inode_start);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Block start</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", session.sb->block_start);
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    fprintf(file, "\t\t\t</table>\n");
+    fprintf(file, "\t\t>\n");
+    fprintf(file, "\t]\n");
+
+    fprintf(file, "}\n"); 
+    fclose(file);
+
+    char cmd[300] = {0};
+    strcpy(cmd, "dot -T");
+    strcat(cmd, getTypeFilename(values.path));
+    strcat(cmd, " ");
+    strcat(cmd, dotfile);
+    strcat(cmd, " -o ");
+    strcat(cmd, values.path);
+    printf(ANSI_COLOR_BLUE "[d] %s\n" ANSI_COLOR_RESET, cmd);
+    system(cmd);
 }
 
 void reportFile()
