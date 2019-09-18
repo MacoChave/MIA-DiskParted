@@ -953,7 +953,67 @@ void reportLs()
 
 void reportJournal()
 {
+    char dotfile[20] = "ls_report.dot";
+    FILE * file;
+    file = fopen(dotfile, "w");
 
+    int start = session.part_start + sizeof(SuperBlock);
+    int count = session.sb->inodes_count * sizeof(Journal);
+
+    fprintf(file, "digraph {\n");
+    fprintf(file, "\tgraph[pad=\"0.5\", nodesep=\"0.5\", ranksep=\"2\"]\n");
+    fprintf(file, "\tnode [shape = plain]\n");
+    fprintf(file, "\trankdir = TB\n");
+
+    fprintf(file, "\tJOURNAL [\n");
+    fprintf(file, "\t\tlabel = <\n");
+    fprintf(file, "\t\t\t<table bgcolor = \"khaki\">\n");
+    
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Operation</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Name</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Content</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Date</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Permission</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Owner</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Size</td>\n");
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    Journal *journal;
+    for (int i = 0; i < count; i++)
+    {
+        journal = getJournal(start);
+        if (journal->command == _ERROR_) return;
+
+        fprintf(file, "\t\t\t\t<tr>\n");
+        fprintf(file, "\t\t\t\t\t<td>%c</td>\n", journal->command);
+        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->str_1);
+        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->str_2);
+        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->date);
+        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->ugo);
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", journal->owner);
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", journal->size);
+        fprintf(file, "\t\t\t\t</tr>\n");
+
+        start += sizeof(journal);
+    }
+
+    fprintf(file, "\t\t\t</table>\n");
+    fprintf(file, "\t\t>\n");
+    fprintf(file, "\t]\n");
+
+    fprintf(file, "\n}");
+    fclose(file);
+
+    char cmd[300] = {0};
+    strcpy(cmd, "dot -T");
+    strcat(cmd, getExtensionPath(values.path));
+    strcat(cmd, " ");
+    strcat(cmd, dotfile);
+    strcat(cmd, " -o ");
+    strcat(cmd, values.path);
+    printf(ANSI_COLOR_BLUE "[d] %s\n" ANSI_COLOR_RESET, cmd);
+    system(cmd);
 }
 
 /**
