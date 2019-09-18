@@ -818,12 +818,137 @@ void reportSuperBlock()
 
 void reportFile()
 {
+    /* int no_current = getInodeByPath(values.ruta, _READ_);
+    Inode * current = getInode(no_current);
+    char * text = readFile(current);
 
+    FILE * file;
+    file = fopen(values.path, "w");
+    if (file == NULL) return;
+
+    fprintf(file, "File: %s\n", values.ruta);
+    fprintf(file, "%s\n", text);
+    fclose(file); */
+    // TODO: Crear metodos para generar reporte de archivo
+}
+
+char * octalToLetters(int n)
+{
+    switch (n)
+    {
+    case 7:
+        return "rwx";
+    case 6:
+        return "rw-";
+    case 5:
+        return "r-x";
+    case 4:
+        return "r--";
+    case 3:
+        return "-wx";
+    case 2:
+        return "-w-";
+    case 1:
+        return "--x";
+    case 0:
+        return "---";
+    }
 }
 
 void reportLs()
 {
+    char dotfile[20] = "ls_report.dot";
+    FILE * file;
+    file = fopen(dotfile, "w");
 
+    if (file == NULL) return;
+
+    fprintf(file, "digraph {\n");
+    fprintf(file, "\tgraph[pad=\"0.5\", nodesep=\"0.5\", ranksep=\"2\"]\n");
+    fprintf(file, "\tnode [shape = plain]\n");
+    fprintf(file, "\trankdir = TB\n");
+
+    fprintf(file, "\tLS [\n");
+    fprintf(file, "\t\tlabel = <\n");
+    fprintf(file, "\t\t\t<table bgcolor = \"orchid\">\n");
+    
+    fprintf(file, "\t\t\t\t<tr>\n");
+    fprintf(file, "\t\t\t\t\t<td>Permission</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>User</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Group</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Size</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Date</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Type</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>Name</td>\n");
+    fprintf(file, "\t\t\t\t</tr>\n");
+
+    /* int no_current = getInodeByPath(values.ruta, _READ_);
+    Inode * current = getInode(no_current); */
+    // TODO: Crear metodo para obtener inodo por path
+    
+    for (int i = 0; i < 15; i++)
+    {
+        /* if (current->block[i] < 0) continue;
+        if (current->type = _FILETYPE_) continue;
+
+        BlockDir * bd = (BlockDir *) getBlock(current->block[i], _BKDIR_);
+        for (int j = 0; j < 4; j++)
+        {
+            if (bd->content[j].name[0] == '.') continue;
+
+            char name[10] = {0};
+            strcpy(name, bd->content[j].name);
+
+            Inode * next = getInode(bd->content[j].inode);
+            // CONVERTIR PERMISOS A LETRAS
+            char str_perm[4];
+            sprintf(str_perm, "%d", next->permission);
+            int u = str_perm[0] - '0';
+            int g = str_perm[1] - '0';
+            int o = str_perm[2] - '0';
+            if (next->type == _FILETYPE_)
+            {
+                fprintf(file, "\t\t\t\t<tr>\n");
+                fprintf(file, "\t\t\t\t\t<td>-%s%s%s</td>\n", octalToLetters(u), octalToLetters(g), octalToLetters(o));
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[next->uid].name);
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[next->uid].group);
+                fprintf(file, "\t\t\t\t\t<td>%d</td>\n", next->size);
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", next->ctime);
+                fprintf(file, "\t\t\t\t\t<td>Archivo</td>\n");
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", name);
+                fprintf(file, "\t\t\t\t</tr>\n");
+            }
+            else
+            {
+                fprintf(file, "\t\t\t\t<tr>\n");
+                fprintf(file, "\t\t\t\t\t<td>d%s%s%s</td>\n", octalToLetters(u), octalToLetters(g), octalToLetters(o));
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[next->uid].name);
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[next->uid].group);
+                fprintf(file, "\t\t\t\t\t<td>%d</td>\n", next->size);
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", next->ctime);
+                fprintf(file, "\t\t\t\t\t<td>Directorio</td>\n");
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", name);
+                fprintf(file, "\t\t\t\t</tr>\n");
+            }
+        } */
+    }
+
+    fprintf(file, "\t\t\t</table>\n");
+    fprintf(file, "\t\t>\n");
+    fprintf(file, "\t]\n");
+
+    fprintf(file, "]}\n");    
+    fclose(file);
+
+    char cmd[300] = {0};
+    strcpy(cmd, "dot -T");
+    strcat(cmd, getTypeFilename(values.path));
+    strcat(cmd, " ");
+    strcat(cmd, dotfile);
+    strcat(cmd, " -o ");
+    strcat(cmd, values.path);
+    printf(ANSI_COLOR_BLUE "[d] %s\n" ANSI_COLOR_RESET, cmd);
+    system(cmd);
 }
 
 void reportJournal()
