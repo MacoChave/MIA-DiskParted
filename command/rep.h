@@ -418,7 +418,7 @@ void reportInodes()
 
     char cmd[300] = {0};
     strcpy(cmd, "dot -T");
-    strcat(cmd, getExtensionPath(values.path));
+    strcat(cmd, getTypeFilename(values.path));
     strcat(cmd, " ");
     strcat(cmd, dotfile);
     strcat(cmd, " -o ");
@@ -502,7 +502,7 @@ void reportBlocks()
 
     char cmd[300] = {0};
     strcpy(cmd, "dot -T");
-    strcat(cmd, getExtensionPath(values.path));
+    strcat(cmd, getTypeFilename(values.path));
     strcat(cmd, " ");
     strcat(cmd, dotfile);
     strcat(cmd, " -o ");
@@ -513,7 +513,28 @@ void reportBlocks()
 
 void reportBitmap(char type)
 {
+    if (strcmp(getTypeFilename(values.path), "txt") != 0) 
+    {
+        printf(ANSI_COLOR_RED "[e] El reporte debe ser en .txt\n" ANSI_COLOR_RESET);
+        return;
+    }
 
+    int count = (type == _INODE_) ? 
+            session.sb->inodes_count :
+            session.sb->blocks_count;
+    
+    FILE * file;
+    file = fopen(values.path, "w");
+
+    if (file == NULL) return;
+
+    for (int i = 0; i < count; i++)
+    {
+        char bit = getBitmap(i, _INODE_);
+        fprintf(file, " %c ", bit);
+    }
+
+    fclose(file);
 }
 
 void reportTree()
