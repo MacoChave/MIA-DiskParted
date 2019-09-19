@@ -687,16 +687,95 @@ int fs_checkPermission(int uid, int gid, int inode_permission, char operation)
     }
     return 0;
 }
+
 /**
- * CREAR INODO DESDE UNA RUTA
- * */
+ * @brief Crear directorio desde ruta en sistema de archivos
+ * 
+ * @param path 
+ * @param isRecursive 
+ * @param inodeType 
+ * @param operation 
+ * @return int 
+ */
+int fs_createDirectoryFromPath(char path[], int isRecursive, char inodeType, char operation)
+{
+    int pivot = 0;
+    int lenght_path = strlen(path);
+    int no_container = 0;
+    int no_next = 0;
+    char * str_path = NULL;
+    Inode * current = getInode(0);
+    str_path = strtok(path, "/");
+
+    while (str_path != NULL)
+    {
+        pivot += strlen(str_path) + 1;
+        no_container = no_next;
+        int hasPermission = checkPermission(current->uid, current->gid, current->permission, operation);
+        no_next = fs_getDirectoryByName(str_path, current);
+        if (no_next < 0)
+        {
+            if (isRecursive || (operation == _CREATE_ && pivot == lenght_path))
+            {
+                if (!hasPermission && no_container != 0) return -1;
+                if (inodeType == _DIRECTORY_TYPE_)
+                {
+                    no_next = fs_createDirectory(str_path, current, no_container);
+                    current = getInode(no_next);
+                }
+                else if (inodeType == _FILE_TYPE_)
+                {
+                    no_next = fs_createFile(str_path, current, no_container);
+                    return no_next;
+                }
+            }
+            else return no_next;
+        }
+        else
+        {
+            if (!hasPermission && no_container != 0) return -1;
+            current = getInode(no_next);
+            if (current->type == _FILE_TYPE_) return no_next;
+        }
+        str_path = strtok(NULL, "/");
+    }
+    return no_next;
+}
 
 /**
  * BUSCAR INODO POR RUTA
  * */
 
 /**
+ * @brief Get the Directory By Path object
  * 
- * */
+ * @param path 
+ * @param operation 
+ * @return int 
+ */
+int getDirectoryByPath(char path[], char operation)
+{
+    int pivot = 0;
+    int lenght_path = strlen(path);
+    int no_container = 0;
+    int no_next = 0;
+    char * str_path = NULL;
+    Inode * current = getInode(0);
+    str_path = strtok(path, "/");
 
+    while (str_path != NULL)
+    {
+        pivot += strlen(str_path) + 1;
+        no_container = no_next;
+        int hasPermission = checkPermission(current->uid, current->gid, current->permission, operation);
+        no_next = fs_getDirectoryByName(str_path, current);
+        if (no_next < 0) return -1;
+        if (pivot == lenght_path) return no_next;
+        if (!hasPermission && no_container != 0) return -1;
+        
+        current = getInode(no_next);
+        str_path = strtok(NULL, "/");
+    }
+    return no_next;
+}
 #endif // FILESYSTEM_H
