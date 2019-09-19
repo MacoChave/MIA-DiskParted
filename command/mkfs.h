@@ -20,8 +20,8 @@ void initFileSystem()
 {
     /* CREAR INODE ROOT Y PRIMER BLOQUE */
     Inode * root = newInode(_DIRECTORY_TYPE_);
-    // root->uid = 2;
-    // root->gid = 1;
+    root->uid = 2;
+    root->gid = 1;
 
     DirectoryBlock * rootDir = newDirectoryBlock(0, 0);
     root->block[0] = 0;
@@ -41,7 +41,9 @@ void initFileSystem()
 
     updateSuperBlock();
 
-    // TODO: Crear Inode users.txt y escribir grupo y usuario root
+    int no_file = fs_createFile("users.txt", root, 0);
+    Inode * file = getInode(no_file);
+    fs_writeFile(__USERTXT__, file, no_file, 0);
 }
 
 void settingBitmaps()
@@ -66,7 +68,6 @@ void settingSuperBlock(Partition part)
     strftime(session.sb->mounted_date, sizeof(session.sb->mounted_date), "%d/%m/%y %H:%M", date);
     strftime(session.sb->unmounted_date, sizeof(session.sb->unmounted_date), "%d/%m/%y %H:%M", date);
 
-    // TODO: Comprobar formula para ext2
     /* CALCULAR n */
     double n = 0;
     double structs_count = 0;
@@ -83,9 +84,8 @@ void settingSuperBlock(Partition part)
     session.sb->free_inodes = n;
     session.sb->free_blocks = 3 * n;
 
-    // TODO: Comprobar para ext2
     initWorkspace += (session.sb->filesystem == 3) ? 
-        __SUPERBLOCK__ + n + __JOURNAL__ : 
+        __SUPERBLOCK__ + n * __JOURNAL__ + n : 
         __SUPERBLOCK__ + n;
     
     session.sb->bm_inode_start = initWorkspace;
