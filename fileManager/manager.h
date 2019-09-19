@@ -370,10 +370,8 @@ int clearJournals(int start, int count)
         Journal * jounal = newJournal();
         fseek(file, start, SEEK_SET);
         for (int i = 0; i < count; i++)
-        {
             fwrite(jounal, sizeof(Journal), 1, file);
-            fclose(file);
-        }
+        fclose(file);
         return 1;
     }
 
