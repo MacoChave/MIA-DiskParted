@@ -4,8 +4,12 @@
 #include "../var/globals.h"
 
 /**
- * LEER ARCHIVO DE TEXTO
- * */
+ * @brief Leer archivo de texto en sistema de archivos en apuntadores indirectos
+ * 
+ * @param current 
+ * @param level 
+ * @return char* 
+ */
 char * fs_readFile_Indirect(PointerBlock * current, int level)
 {
     char * text = (char *)calloc(279552, sizeof(char));
@@ -30,6 +34,12 @@ char * fs_readFile_Indirect(PointerBlock * current, int level)
     return text;
 }
 
+/**
+ * @brief Leer archivo de texto en sistema de archivos
+ * 
+ * @param current 
+ * @return char* 
+ */
 char * fs_readFile(Inode * current)
 {
     int level = 1;
@@ -59,9 +69,16 @@ char * fs_readFile(Inode * current)
     }
     return text;
 }
+
 /**
- * ESCRIBIR ARCHIVO DE TEXTO
- * */
+ * @brief Escribir archivo de texto en sistema de archivos en apuntadores indirectos
+ * 
+ * @param text 
+ * @param current 
+ * @param no_current 
+ * @param level 
+ * @return int 
+ */
 int fs_writeFile_Indirect(char text[], PointerBlock * current, int no_current, int level)
 {
     for (int i = 0; i < 16; i++)
@@ -115,6 +132,14 @@ int fs_writeFile_Indirect(char text[], PointerBlock * current, int no_current, i
     }
 }
 
+/**
+ * @brief Escribir archivo de texto en sistema de archivos
+ * 
+ * @param text 
+ * @param current 
+ * @param no_current 
+ * @param i 
+ */
 void fs_writeFile(char text[], Inode * current, int no_current, int i)
 {
     int level = 1;
@@ -164,13 +189,141 @@ void fs_writeFile(char text[], Inode * current, int no_current, int i)
         level++;
     }
 }
-/**
- * OBTENER O GENERAR CONTENIDO PARA ARCHIVO DE TEXTO
- * */
 
 /**
- * BUSCAR INODO POR NOMBRE
- * */
+ * @brief Obtener archivo de texto en sistema de archivos desde archivo externo
+ * 
+ * @param cont 
+ * @param current 
+ * @param no_current 
+ */
+void generateContent_cont(char cont[300], Inode * current, int no_current)
+{
+    int i = 0;
+    int size = 0;
+    char text[64] = {0};
+    FILE * file = fopen(cont, "r");
+
+    if (file != NULL)
+    {
+        while(!feof(file) || i < 12){
+            fgets(text, 64, file);
+            size += strlen(text);
+            if (strlen(text) > 0)
+                fs_writeFile(text, current, no_current, i);
+            memset(text, 0, 64);
+            i++;
+        }
+        
+        fclose(file);
+    }
+}
+
+/**
+ * @brief Generar archivo de texto en sistema de archivos
+ * 
+ * @param size 
+ * @param current 
+ * @param no_current 
+ */
+void generateContent_size(int size, Inode * current, int no_current)
+{
+    char text[64] = {0};
+
+    int blocks_count = size / 64;
+    if (size % 64 > 0)
+        blocks_count++;
+    
+    for (int i = 0; i < 15; i++)
+    {
+        if (i < blocks_count)
+        {
+            for (int j = 0, a = 0; j < 64; j++, a++)
+            {
+                char aux[3] = {a + '0', '\0'};
+                strcat(text, aux);
+                if (a == 9) a = -1;
+            }
+
+            fs_writeFile(text, current, no_current, i);
+            memset(text, 0, 64);
+        }
+/*         else
+            fs_writeFile(text, current, no_current, i); */
+            // TODO: Limpiar resto del contenido sin ustilizar
+    }
+}
+
+/**
+ * @brief Buscar inodos por nombre en apuntadores indirectos
+ * 
+ * @param name 
+ * @param bp 
+ * @param level 
+ * @return int 
+ */
+int fs_getInodeByName_Indirect(char name[], PointerBlock * bp, int level)
+{
+    int no_inode = -1;
+    for (int i = 0; i < 16; i++)
+    {
+        if (bp->pointers[i] < 0) continue;
+        if (level > 1){
+            no_inode = fs_getInodeByName_Indirect(name, bp, level - 1);
+            if (no_inode > 0) return no_inode;
+            else continue;
+        }
+    
+        DirectoryBlock * bd = (DirectoryBlock *) getBlock(bp->pointers[i]);
+        for (int j = 0; j < 4; j++)
+        {
+            if (bd->content[j].inode < 0) continue;
+            if (strcmp(name, bd->content[j].name) == 0)
+                return bd->content[j].inode;
+        }
+    }
+    return no_inode;
+}
+
+/**
+ * @brief Buscar inodos por nombre
+ * 
+ * @param name 
+ * @param current 
+ * @return int 
+ */
+int fs_getInodeByName(char name[], Inode * current)
+{
+    int no_inode = -1;
+    int level = 1;
+
+    for (int i = 0; i < 15; i++)
+    {
+        if (current->block[i] < 0) continue;
+        if (i < 12)
+        {
+            /* BLOQUES DIRECTOS */
+            DirectoryBlock * bd = (DirectoryBlock *) getBlock(current->block[i]);
+            for (int j = 0; j < 4; j++)
+            {
+                if (bd->content[j].inode < 0) continue;
+                if (strcmp(name, bd->content[j].name) == 0)
+                    return bd->content[j].inode;
+            }
+        }
+        else
+        {
+            /*  BLOQUES INDIRECTOS */
+            PointerBlock * bp = (PointerBlock *) getBlock(current->block[i]);
+            no_inode = fs_getInodeByName_Indirect(name, bp, level);
+            if (no_inode > 0)
+                return no_inode;
+            level++;
+        }
+    }
+
+    return no_inode;
+}
 
 /**
  * CREAR INODO DE DIRECTORIO
