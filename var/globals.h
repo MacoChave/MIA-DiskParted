@@ -74,6 +74,12 @@
 #define _INODE_ 3
 #define _BLOCK_ 4
 
+/* OPERACIONES SOBRE ARCHIVOS */
+#define _CREATE_ 'C'
+#define _READ_ 'R'
+#define _UPDATE_ 'U'
+#define _DELETE_ 'D'
+
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
