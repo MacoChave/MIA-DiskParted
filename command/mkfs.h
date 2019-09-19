@@ -22,6 +22,7 @@ void initFileSystem()
     Inode * root = newInode(_DIRECTORY_TYPE_);
     root->uid = 2;
     root->gid = 1;
+    root->permission = 777;
 
     DirectoryBlock * rootDir = newDirectoryBlock(0, 0);
     root->block[0] = 0;
