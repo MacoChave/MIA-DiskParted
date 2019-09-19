@@ -640,6 +640,54 @@ int fs_createFile(char name[], Inode * current, int no_current)
  * */
 
 /**
+ * @brief Verificar permisos dentro del sistema de archivos
+ * 
+ * @param uid 
+ * @param gid 
+ * @param inode_permission 
+ * @param operation 
+ * @return int 
+ */
+int fs_checkPermission(int uid, int gid, int inode_permission, char operation)
+{
+    if (strcmp(permissions[session.id_user].group, "root") == 0) return 1;
+    
+    char str_perm[4];
+    sprintf(str_perm, "%d", inode_permission);
+    int u = str_perm[0] - '0';
+    int g = str_perm[1] - '0';
+    int o = str_perm[2] - '0';
+    int sameGroup = (session.id_group == gid) ? 1 : 0;
+    int userIsOwner = (session.id_user == uid) ? 1 : 0;
+
+    switch (operation)
+    {
+        case _CREATE_: // > 6
+            if (o >= 6) return 1;
+            if (sameGroup && g >= 6) return 1;
+            if (userIsOwner && u >= 6) return 1;
+            break;
+        case _READ_: // > 4
+            if (o >= 4) return 1;
+            if (sameGroup && g >= 4) return 1;
+            if (userIsOwner && u >= 4) return 1;
+            break;
+        case _UPDATE_: // >= 6
+            if (o >= 6) return 1;
+            if (sameGroup && g >= 6) return 1;
+            if (userIsOwner && u >= 6) return 1;
+            break;
+        case _DELETE_: // >= 6
+            if (o >= 6) return 1;
+            if (sameGroup && g >= 6) return 1;
+            if (userIsOwner && u >= 6) return 1;
+            break;
+        default: 
+            break;
+    }
+    return 0;
+}
+/**
  * CREAR INODO DESDE UNA RUTA
  * */
 
