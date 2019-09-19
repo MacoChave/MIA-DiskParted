@@ -10,7 +10,9 @@
  */
 int main() 
 {
+    initSession();
     initDisksMount();
+    initPermissionlist();
     clearValues();
     printf("---> Disk Parted <---\n");
     char input[999] = "";
