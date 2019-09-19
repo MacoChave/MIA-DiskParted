@@ -452,7 +452,7 @@ void reportBlocks()
 
             if (current->type == _FILE_TYPE_)
             {
-                FileBlock * bf = (FileBlock *) getBlock(current->block[j]);
+                FileBlock * bf = (FileBlock *) getGenericBlock(current->block[j], _FILE_TYPE_);
 
                 fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
                 fprintf(file, "\t\tlabel = <\n");
@@ -472,7 +472,7 @@ void reportBlocks()
             }
             else if (current->type == _DIRECTORY_TYPE_)
             {
-                DirectoryBlock * bd = (DirectoryBlock *) getBlock(current->block[j]);
+                DirectoryBlock * bd = (DirectoryBlock *) getGenericBlock(current->block[j], _DIRECTORY_TYPE_);
 
                 fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
                 fprintf(file, "\t\tlabel = <\n");
@@ -630,7 +630,7 @@ void reportTree()
 
             if (current->type == _FILE_TYPE_)
             {
-                FileBlock * bf = (FileBlock *) getBlock(current->block[j]);
+                FileBlock * bf = (FileBlock *) getGenericBlock(current->block[j], _FILE_TYPE_);
 
                 fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
                 fprintf(file, "\t\tlabel = <\n");
@@ -650,7 +650,7 @@ void reportTree()
             }
             else if (current->type == _DIRECTORY_TYPE_)
             {
-                DirectoryBlock * bd = (DirectoryBlock *) getBlock(current->block[j]);
+                DirectoryBlock * bd = (DirectoryBlock *) getGenericBlock(current->block[j], _DIRECTORY_TYPE_);
 
                 fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
                 fprintf(file, "\t\tlabel = <\n");
@@ -1007,7 +1007,7 @@ void reportJournal()
 
     char cmd[300] = {0};
     strcpy(cmd, "dot -T");
-    strcat(cmd, getExtensionPath(values.path));
+    strcat(cmd, getTypeFilename(values.path));
     strcat(cmd, " ");
     strcat(cmd, dotfile);
     strcat(cmd, " -o ");

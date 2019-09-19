@@ -519,7 +519,7 @@ int fs_createFile_Indirect(char name[], PointerBlock * current, int no_current, 
             else
                 new_bp = (PointerBlock *) getGenericBlock(current->pointers[i], _POINTER_TYPE_);
 
-            no_inode = createInodeFile_Indirect(name, new_bp, current->pointers[i], level - 1);
+            no_inode = fs_createFile_Indirect(name, new_bp, current->pointers[i], level - 1);
             if (no_inode > 0) return no_inode;
         }
         else
@@ -546,7 +546,7 @@ int fs_createFile_Indirect(char name[], PointerBlock * current, int no_current, 
                     new_bd->content[j].inode = session.sb->first_inode;
                     strcpy(new_bd->content[j].name, name);
                     updateGenericBlock(current->pointers[i], new_bd);
-                    saveInode(_EMPTY_, next);
+                    updateInode(_EMPTY_, next);
                     updateBitmap(new_bd->content[j].inode, '1', _INODE_);
                     session.sb->free_inodes -= 1;
                     session.sb->first_inode = getNextFreeBit_Bitmap(_INODE_);
@@ -662,22 +662,22 @@ int fs_checkPermission(int uid, int gid, int inode_permission, char operation)
 
     switch (operation)
     {
-        case _CREATE_: // > 6
+        case __CREATE__: // > 6
             if (o >= 6) return 1;
             if (sameGroup && g >= 6) return 1;
             if (userIsOwner && u >= 6) return 1;
             break;
-        case _READ_: // > 4
+        case __READ__: // > 4
             if (o >= 4) return 1;
             if (sameGroup && g >= 4) return 1;
             if (userIsOwner && u >= 4) return 1;
             break;
-        case _UPDATE_: // >= 6
+        case __UPDATE__: // >= 6
             if (o >= 6) return 1;
             if (sameGroup && g >= 6) return 1;
             if (userIsOwner && u >= 6) return 1;
             break;
-        case _DELETE_: // >= 6
+        case __DELETE__: // >= 6
             if (o >= 6) return 1;
             if (sameGroup && g >= 6) return 1;
             if (userIsOwner && u >= 6) return 1;
@@ -711,11 +711,11 @@ int fs_createDirectoryFromPath(char path[], int isRecursive, char inodeType, cha
     {
         pivot += strlen(str_path) + 1;
         no_container = no_next;
-        int hasPermission = checkPermission(current->uid, current->gid, current->permission, operation);
+        int hasPermission = fs_checkPermission(current->uid, current->gid, current->permission, operation);
         no_next = fs_getDirectoryByName(str_path, current);
         if (no_next < 0)
         {
-            if (isRecursive || (operation == _CREATE_ && pivot == lenght_path))
+            if (isRecursive || (operation == __CREATE__ && pivot == lenght_path))
             {
                 if (!hasPermission && no_container != 0) return -1;
                 if (inodeType == _DIRECTORY_TYPE_)
@@ -767,7 +767,7 @@ int fs_getDirectoryByPath(char path[], char operation)
     {
         pivot += strlen(str_path) + 1;
         no_container = no_next;
-        int hasPermission = checkPermission(current->uid, current->gid, current->permission, operation);
+        int hasPermission = fs_checkPermission(current->uid, current->gid, current->permission, operation);
         no_next = fs_getDirectoryByName(str_path, current);
         if (no_next < 0) return -1;
         if (pivot == lenght_path) return no_next;

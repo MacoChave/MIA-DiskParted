@@ -75,10 +75,10 @@
 #define _BLOCK_ 4
 
 /* OPERACIONES SOBRE ARCHIVOS */
-#define _CREATE_ 'C'
-#define _READ_ 'R'
-#define _UPDATE_ 'U'
-#define _DELETE_ 'D'
+#define __CREATE__ 'C'
+#define __READ__ 'R'
+#define __UPDATE__ 'U'
+#define __DELETE__ 'D'
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
