@@ -1054,7 +1054,11 @@ void exec_rep ()
 
     /* REPORTES DE FASE 1 */
     if (strcmp(values.name, "disk") == 0)
+    {
         reportDisk(mbr, disks_mount[i].path);
+        clearSpaceDisk();
+        return;
+    }
     else if (strcmp(values.name, "mbr") == 0)
     {
         reportMBR(mbr, disks_mount[i].path);
