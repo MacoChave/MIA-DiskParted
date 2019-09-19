@@ -753,7 +753,7 @@ int fs_createDirectoryFromPath(char path[], int isRecursive, char inodeType, cha
  * @param operation 
  * @return int 
  */
-int getDirectoryByPath(char path[], char operation)
+int fs_getDirectoryByPath(char path[], char operation)
 {
     int pivot = 0;
     int lenght_path = strlen(path);
