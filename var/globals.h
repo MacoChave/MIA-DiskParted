@@ -201,6 +201,9 @@ Inode * newInode(int type)
     strftime(in->modified_date, sizeof(in->modified_date) - 1, "%d/%m/%y %H:%M", date);
     strftime(in->last_date, sizeof(in->last_date) - 1, "%d/%m/%y %H:%M", date);
 
+    for (int i = 0; i < 15; i++)
+        in->block[i] = -1;
+
     return in;
 }
 

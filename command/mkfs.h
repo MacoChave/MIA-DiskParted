@@ -148,7 +148,7 @@ void exec_mkfs() {
     strcpy(session.path, disks_mount[x].path);
     settingSuperBlock(part);
     updateSuperBlock();
-    clearJournals(part.part_start + __SUPERBLOCK__, session.sb->inodes_count * __JOURNAL__);
+    clearJournals(part.part_start + __SUPERBLOCK__, session.sb->inodes_count);
     settingBitmaps();
     initFileSystem();
 
