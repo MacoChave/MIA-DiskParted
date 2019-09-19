@@ -255,26 +255,26 @@ void generateContent_size(int size, Inode * current, int no_current)
 }
 
 /**
- * @brief Buscar inodos por nombre en apuntadores indirectos
+ * @brief Buscar directorios por nombre en apuntadores indirectos
  * 
  * @param name 
  * @param bp 
  * @param level 
  * @return int 
  */
-int fs_getInodeByName_Indirect(char name[], PointerBlock * bp, int level)
+int fs_getDirectoryByName_Indirect(char name[], PointerBlock * bp, int level)
 {
     int no_inode = -1;
     for (int i = 0; i < 16; i++)
     {
         if (bp->pointers[i] < 0) continue;
         if (level > 1){
-            no_inode = fs_getInodeByName_Indirect(name, bp, level - 1);
+            no_inode = fs_getDirectoryByName_Indirect(name, bp, level - 1);
             if (no_inode > 0) return no_inode;
             else continue;
         }
     
-        DirectoryBlock * bd = (DirectoryBlock *) getBlock(bp->pointers[i]);
+        DirectoryBlock * bd = (DirectoryBlock *) getGenericBlock(bp->pointers[i], _DIRECTORY_TYPE_);
         for (int j = 0; j < 4; j++)
         {
             if (bd->content[j].inode < 0) continue;
@@ -286,13 +286,13 @@ int fs_getInodeByName_Indirect(char name[], PointerBlock * bp, int level)
 }
 
 /**
- * @brief Buscar inodos por nombre
+ * @brief Buscar directorios por nombre
  * 
  * @param name 
  * @param current 
  * @return int 
  */
-int fs_getInodeByName(char name[], Inode * current)
+int fs_getDirectoryByName(char name[], Inode * current)
 {
     int no_inode = -1;
     int level = 1;
@@ -303,7 +303,7 @@ int fs_getInodeByName(char name[], Inode * current)
         if (i < 12)
         {
             /* BLOQUES DIRECTOS */
-            DirectoryBlock * bd = (DirectoryBlock *) getBlock(current->block[i]);
+            DirectoryBlock * bd = (DirectoryBlock *) getGenericBlock(current->block[i], _DIRECTORY_TYPE_);
             for (int j = 0; j < 4; j++)
             {
                 if (bd->content[j].inode < 0) continue;
@@ -314,8 +314,8 @@ int fs_getInodeByName(char name[], Inode * current)
         else
         {
             /*  BLOQUES INDIRECTOS */
-            PointerBlock * bp = (PointerBlock *) getBlock(current->block[i]);
-            no_inode = fs_getInodeByName_Indirect(name, bp, level);
+            PointerBlock * bp = (PointerBlock *) getGenericBlock(current->block[i], _POINTER_TYPE_);
+            no_inode = fs_getDirectoryByName_Indirect(name, bp, level);
             if (no_inode > 0)
                 return no_inode;
             level++;
@@ -326,8 +326,163 @@ int fs_getInodeByName(char name[], Inode * current)
 }
 
 /**
- * CREAR INODO DE DIRECTORIO
- * */
+ * @brief Crear directorio en sistema de archivos en apuntadores indirectos
+ * 
+ * @param name 
+ * @param current 
+ * @param no_upper 
+ * @param no_current 
+ * @param level 
+ * @return int 
+ */
+int fs_createDirectory_Indirect(char name[], PointerBlock * current, int no_upper, int no_current, int level)
+{
+    int no_inode = -1;
+
+    for (int i = 0; i < 16; i++)
+    {
+        if (level > 1)
+        {
+            PointerBlock * new_bp = newPointerBlock();
+            if (current->pointers[i] == -1)
+            {
+                current->pointers[i] = session.sb->first_block;
+                updateGenericBlock(no_current, current);
+                updateGenericBlock(_EMPTY_, new_bp);
+                updateBitmap(current->pointers[i], '1', _BLOCK_);
+                session.sb->free_blocks -= 1;
+                session.sb->first_block = getNextFreeBitmap(_BLOCK_);
+                updateSuperBlock();
+            }
+            else
+                new_bp = (PointerBlock *) getGenericBlock(current->pointers[i], _POINTER_TYPE_);
+
+            no_inode = fs_createDirectory_Indirect(name, new_bp, no_upper, current->pointers[i], level - 1);
+            if (no_inode > 0) return no_inode;
+        }
+        else
+        {
+            DirectoryBlock * bd = newDirectoryBlock(_EMPTY_, _EMPTY_);
+            if (current->pointers[i] == -1)
+            {
+                current->pointers[i] = session.sb->first_block;
+                updateGenericBlock(no_current, current);
+                updateGenericBlock(_EMPTY_, bd);
+                updateBitmap(current->pointers[i], '1', _BLOCK_);
+                session.sb->free_blocks -= 1;
+                session.sb->first_block = getNextFreeBitmap(_BLOCK_);
+                updateSuperBlock();
+            }
+            else
+                bd = (DirectoryBlock *) getGenericBlock(current->pointers[i], _DIRECTORY_TYPE_);
+            
+            for (int j = 0; j < 4; j++)
+            {
+                if (bd->content[j].inode < 0)
+                {
+                    Inode * next = newInode(_DIRECTORY_TYPE_);
+                    DirectoryBlock * new_bd = newDirectoryBlock(session.sb->first_inode, no_upper);
+                    next->block[0] = session.sb->first_block;
+                    bd->content[j].inode = session.sb->first_inode;
+                    strcpy(bd->content[j].name, name);
+                    updateGenericBlock(current->pointers[i], bd);
+                    updateInode(_EMPTY_, next);
+                    updateGenericBlock(_EMPTY_, new_bd);
+                    updateBitmap(bd->content[j].inode, '1', _INODE_);
+                    updateBitmap(next->block[0], '1', _BLOCK_);
+                    session.sb->free_inodes -= 1;
+                    session.sb->free_blocks -= 1;
+                    session.sb->first_inode = getNextFreeBitmap(_INODE_);
+                    session.sb->first_block = getNextFreeBitmap(_BLOCK_);
+                    updateSuperBlock();
+                    return bd->content[j].inode;
+                }
+            }
+        }
+    }
+    return no_inode;
+}
+
+/**
+ * @brief Crear directorio en sistema de archivos
+ * 
+ * @param name 
+ * @param current 
+ * @param no_current 
+ * @return int 
+ */
+int fs_createDirectory(char name[], Inode * current, int no_current)
+{
+    int no_next = -1;
+    int level = 1;
+
+    for (int i = 0; i < 15; i++)
+    {
+        if (i < 12)
+        {
+            /* BLOQUES DIRECTOS */
+            DirectoryBlock * bd = newDirectoryBlock(_EMPTY_, _EMPTY_);
+            if (current->block[i] == -1)
+            {
+                current->block[i] = session.sb->first_block;
+                updateInode(no_current, current);
+                updateGenericBlock(_EMPTY_, bd);
+                updateBitmap(current->block[i], '1', _BLOCK_);
+                session.sb->free_blocks -= 1;
+                session.sb->first_block = getNextFreeBitmap(_BLOCK_);
+            }
+            else
+                bd = (DirectoryBlock *) getGenericBlock(current->block[i], _DIRECTORY_TYPE_);
+            
+            for (int j = 0; j < 4; j++)
+            {
+                if (bd->content[j].inode < 0)
+                {
+                    Inode * next = newInode(_DIRECTORY_TYPE_);
+                    DirectoryBlock * new_bd = newDirectoryBlock(session.sb->first_inode, no_current);
+                    next->block[0] = session.sb->first_block;
+
+                    bd->content[j].inode = session.sb->first_inode;
+                    strcpy(bd->content[j].name, name);
+                    updateGenericBlock(current->block[i], bd);
+                    updateInode(_EMPTY_, next);
+                    updateGenericBlock(_EMPTY_, new_bd);
+                    updateBitmap(bd->content[j].inode, '1', _INODE_);
+                    updateBitmap(next->block[0], '1', _BLOCK_);
+                    session.sb->free_inodes -= 1;
+                    session.sb->free_blocks -= 1;
+                    session.sb->first_inode = getNextFreeBitmap(_INODE_);
+                    session.sb->first_block = getNextFreeBitmap(_BLOCK_);
+                    updateSuperBlock();
+                    return bd->content[j].inode;
+                }
+            }
+        }
+        else
+        {
+            PointerBlock * bp = newPointerBlock();
+            if (current->block[i] == -1)
+            {
+                current->block[i] = session.sb->first_block;
+                updateInode(no_current, current);
+                updateGenericBlock(_EMPTY_, bp);
+                updateBitmap(current->block[i], '1', _BLOCK_);
+                session.sb->free_blocks -= 1;
+                session.sb->first_block = getNextFreeBitmap(_BLOCK_);
+                updateSuperBlock();
+            }
+            else
+                bp = (PointerBlock *) getGenericBlock(current->block[i], _POINTER_TYPE_);
+            
+            no_next = fs_createDirectory_Indirect(name, bp, no_current, current->block[i], level);
+            if (no_next > 0)
+                return no_next;
+            level++;
+        }
+    }
+
+    return no_next;
+}
 
 /**
  * CREAR INODO DE ARCHIVO
