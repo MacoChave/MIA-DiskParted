@@ -190,8 +190,8 @@ SuperBlock * newSuperBlock()
 Inode * newInode(int type)
 {
     Inode * in = (Inode *) calloc(1, sizeof(Inode));
-    in->uid = permissions[session.id_user].id;
-    in->gid = permissions[session.id_group].id;
+    in->uid = (session.id_user >= 0) ? permissions[session.id_user].id : -1;
+    in->gid = (session.id_group >= 0) ? permissions[session.id_group].id : -1;
     in->permission = 664;
     in->type = type;
 
