@@ -197,6 +197,7 @@ struct Session
     int id_user;
     int id_group;
     int part_start;
+    int part_size;
     char path[300];
     SuperBlock * sb;
 };

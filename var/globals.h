@@ -127,6 +127,7 @@ void initSession()
     session.id_user = -1;
     session.id_group = -1;
     session.part_start = -1;
+    session.part_size = -1;
     memset(session.path, 0, 300);
     session.sb = NULL;
 }

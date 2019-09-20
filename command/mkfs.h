@@ -55,10 +55,10 @@ void settingBitmaps()
         updateBitmap(i, '0', _INODE_);   
 }
 
-void settingSuperBlock(Partition part)
+void settingSuperBlock()
 {
     session.sb = (SuperBlock *) calloc(1, sizeof(SuperBlock));
-    int initWorkspace = part.part_start;
+    int initWorkspace = session.part_start;
 
     session.sb->filesystem = values.fs - '0';
     session.sb->magic = 61267;
@@ -72,7 +72,7 @@ void settingSuperBlock(Partition part)
     /* CALCULAR n */
     double n = 0;
     double structs_count = 0;
-    double dividend = part.part_size - __SUPERBLOCK__;
+    double dividend = session.part_size - __SUPERBLOCK__;
     double divider = (session.sb->filesystem == 3) ? 
         __JOURNAL__ + __INODE__ + 3 * __GENBLOCK__ + 4 : 
         __INODE__ + 3 * __GENBLOCK__ + 4;
@@ -124,6 +124,10 @@ void exec_mkfs() {
         return;
     }
 
+    session.part_start = disks_mount[x].parts_mount[y].mount_start;
+    session.part_size = disks_mount[x].parts_mount[y].mount_size;
+
+/* 
     MBR mbr = getMBR(disks_mount[x].path);
     Partition part;
     int a;
@@ -140,19 +144,20 @@ void exec_mkfs() {
     }
 
     if (x == 4) return;
+ */
 
     if (values.type != 'n')
-        clearPartDisk(disks_mount[x].path, part.part_start, part.part_start + part.part_size);
+        clearPartDisk(disks_mount[x].path, session.part_start, session.part_start + session.part_size);
     
-    session.part_start = part.part_start;
     strcpy(session.path, disks_mount[x].path);
-    settingSuperBlock(part);
+    settingSuperBlock();
     updateSuperBlock();
-    clearJournals(part.part_start + __SUPERBLOCK__, session.sb->inodes_count);
+    clearJournals(session.part_start + __SUPERBLOCK__, session.sb->inodes_count);
     settingBitmaps();
     initFileSystem();
 
     session.part_start = 0;
+    session.part_size = 0;
     memset(session.path, 0, 300);
     session.id_user = -1;
 }
