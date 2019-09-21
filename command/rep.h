@@ -14,6 +14,7 @@
 #include "../var/globals.h"
 #include "../var/filename.h"
 #include "../fileManager/mpartition.h"
+#include "../fileManager/filesystem.h"
 
 /**
  * @brief Cuenta las particiones primarias y extendidas para generar los reportes
@@ -818,18 +819,18 @@ void reportSuperBlock()
 
 void reportFile()
 {
-    /* int no_current = getInodeByPath(values.ruta, _READ_);
-    Inode * current = getInode(no_current);
-    char * text = readFile(current);
+    int no_inode = fs_getDirectoryByPath(values.ruta, __READ__);
+    Inode * current = getInode(no_inode);
+    char * text = fs_readFile(current);
 
     FILE * file;
     file = fopen(values.path, "w");
+
     if (file == NULL) return;
 
-    fprintf(file, "File: %s\n", values.ruta);
-    fprintf(file, "%s\n", text);
-    fclose(file); */
-    // TODO: Crear metodos para generar reporte de archivo
+    fprintf(file, "FILE: %s\n", values.ruta);
+    fprintf(file, "%s", text);
+    fclose(file);
 }
 
 char * octalToLetters(int n)
