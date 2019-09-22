@@ -69,5 +69,6 @@ dkms.conf
 
 ## Todos los reportes generados
 *.dot
+*.md
 
 # End of https://www.gitignore.io/api/c,visualstudiocode
