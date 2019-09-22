@@ -743,11 +743,7 @@ int fs_createDirectoryFromPath(char path[], int isRecursive, char inodeType, cha
 }
 
 /**
- * BUSCAR INODO POR RUTA
- * */
-
-/**
- * @brief Get the Directory By Path object
+ * @brief Buscar directorio por ruta
  * 
  * @param path 
  * @param operation 

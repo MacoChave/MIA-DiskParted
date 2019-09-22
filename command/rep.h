@@ -819,18 +819,27 @@ void reportSuperBlock()
 
 void reportFile()
 {
+    char dotfile[25] = "file_report.md";
     int no_inode = fs_getDirectoryByPath(values.ruta, __READ__);
     Inode * current = getInode(no_inode);
     char * text = fs_readFile(current);
 
     FILE * file;
-    file = fopen(values.path, "w");
+    file = fopen(dotfile, "w");
 
     if (file == NULL) return;
 
-    fprintf(file, "FILE: %s\n", values.ruta);
+    fprintf(file, "# %s\n", values.ruta);
     fprintf(file, "%s", text);
     fclose(file);
+
+    char cmd[300] = {0};
+    strcpy(cmd, "markdown-pdf ");
+    strcat(cmd, dotfile);
+    strcat(cmd, " -o ");
+    strcat(cmd, values.path);
+    printf(ANSI_COLOR_BLUE "[d] %s\n" ANSI_COLOR_RESET, cmd);
+    system(cmd);
 }
 
 char * octalToLetters(int n)
@@ -856,8 +865,64 @@ char * octalToLetters(int n)
     }
 }
 
+void reportLs_indirect(FILE * file, PointerBlock * current, int level)
+{
+    for (int i = 0; i < 16; i++)
+    {
+        if (current->pointers[i] < 0) continue;
+
+        if (level > 1)
+        {
+            PointerBlock * pointer = (PointerBlock *)getGenericBlock(current->pointers[i], _POINTER_TYPE_);
+            reportLs_indirect(file, pointer, level - 1);
+        }
+        else
+        {
+            DirectoryBlock * block = (DirectoryBlock *)getGenericBlock(current->pointers[i], _DIRECTORY_TYPE_);
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (block->content[i].inode < 0) continue;
+                
+                Inode * child = getInode(block->content[i].inode);
+                
+                char str_perm[4] = {0};
+                strcpy(str_perm, "%d", child->permission);
+
+                fprintf(file, "\t\t\t\t<tr>\n");
+                if (child->type == _FILE_TYPE_)
+                    fprintf(file, "\t\t\t\t\t<td>-");
+                else
+                    fprintf(file, "\t\t\t\t\t<td>d");
+                fprintf(file, "%s%s%s</td>\n", octalToLetters(str_perm[0] - '0'), octalToLetters(str_perm[1] - '0'), octalToLetters(str_perm[2] - '0'));
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[child->uid].name);
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[child->gid].group);
+                fprintf(file, "\t\t\t\t\t<td>%d</td>\n", child->size);
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", child->create_date);
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", block->content[i].name);
+                fprintf(file, "\t\t\t\t</tr>\n");
+            }
+        }
+    }
+}
+
 void reportLs()
 {
+    int level = 1;
+    int no_current = fs_getDirectoryByPath(values.ruta, __READ__);
+    if (no_current < 0)
+    {
+        printf(ANSI_COLOR_RED "[e] No posee permisos para comando LS\n" ANSI_COLOR_RESET);
+        return;
+    }
+
+    Inode * current = getInode(no_current);
+    if (current->type = _FILE_TYPE_)
+    {
+        printf(ANSI_COLOR_RED "[e] LS no se puede ejecutar sobre un archivo\n" ANSI_COLOR_RESET);
+        return;
+    }
+    
     char dotfile[20] = "ls_report.dot";
     FILE * file;
     file = fopen(dotfile, "w");
@@ -868,7 +933,6 @@ void reportLs()
     fprintf(file, "\tgraph[pad=\"0.5\", nodesep=\"0.5\", ranksep=\"2\"]\n");
     fprintf(file, "\tnode [shape = plain]\n");
     fprintf(file, "\trankdir = TB\n");
-
     fprintf(file, "\tLS [\n");
     fprintf(file, "\t\tlabel = <\n");
     fprintf(file, "\t\t\t<table bgcolor = \"orchid\">\n");
@@ -883,55 +947,43 @@ void reportLs()
     fprintf(file, "\t\t\t\t\t<td>Name</td>\n");
     fprintf(file, "\t\t\t\t</tr>\n");
 
-    /* int no_current = getInodeByPath(values.ruta, _READ_);
-    Inode * current = getInode(no_current); */
-    // TODO: Crear metodo para obtener inodo por path
-    
     for (int i = 0; i < 15; i++)
     {
-        /* if (current->block[i] < 0) continue;
-        if (current->type = _FILETYPE_) continue;
+        if (current->block[i] < 0) continue;
 
-        BlockDir * bd = (BlockDir *) getBlock(current->block[i], _BKDIR_);
-        for (int j = 0; j < 4; j++)
+        if (i < 12)
         {
-            if (bd->content[j].name[0] == '.') continue;
-
-            char name[10] = {0};
-            strcpy(name, bd->content[j].name);
-
-            Inode * next = getInode(bd->content[j].inode);
-            // CONVERTIR PERMISOS A LETRAS
-            char str_perm[4];
-            sprintf(str_perm, "%d", next->permission);
-            int u = str_perm[0] - '0';
-            int g = str_perm[1] - '0';
-            int o = str_perm[2] - '0';
-            if (next->type == _FILETYPE_)
+            DirectoryBlock * block = (DirectoryBlock *) getGenericBlock(current->block[i], _DIRECTORY_TYPE_);
+            
+            for (int i = 0; i < 4; i++)
             {
+                if (block->content[i].inode < 0) continue;
+
+                Inode * child = getInode(block->content[i].inode);
+                
+                char str_perm[4] = {0};
+                strcpy(str_perm, "%d", child->permission);
+
                 fprintf(file, "\t\t\t\t<tr>\n");
-                fprintf(file, "\t\t\t\t\t<td>-%s%s%s</td>\n", octalToLetters(u), octalToLetters(g), octalToLetters(o));
-                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[next->uid].name);
-                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[next->uid].group);
-                fprintf(file, "\t\t\t\t\t<td>%d</td>\n", next->size);
-                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", next->ctime);
-                fprintf(file, "\t\t\t\t\t<td>Archivo</td>\n");
-                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", name);
+                if (child->type == _FILE_TYPE_)
+                    fprintf(file, "\t\t\t\t\t<td>-");
+                else
+                    fprintf(file, "\t\t\t\t\t<td>d");
+                fprintf(file, "%s%s%s</td>\n", octalToLetters(str_perm[0] - '0'), octalToLetters(str_perm[1] - '0'), octalToLetters(str_perm[2] - '0'));
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[child->uid].name);
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[child->gid].group);
+                fprintf(file, "\t\t\t\t\t<td>%d</td>\n", child->size);
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", child->create_date);
+                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", block->content[i].name);
                 fprintf(file, "\t\t\t\t</tr>\n");
             }
-            else
-            {
-                fprintf(file, "\t\t\t\t<tr>\n");
-                fprintf(file, "\t\t\t\t\t<td>d%s%s%s</td>\n", octalToLetters(u), octalToLetters(g), octalToLetters(o));
-                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[next->uid].name);
-                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", permissions[next->uid].group);
-                fprintf(file, "\t\t\t\t\t<td>%d</td>\n", next->size);
-                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", next->ctime);
-                fprintf(file, "\t\t\t\t\t<td>Directorio</td>\n");
-                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", name);
-                fprintf(file, "\t\t\t\t</tr>\n");
-            }
-        } */
+        }
+        else
+        {
+            PointerBlock * pointer = (PointerBlock *) getGenericBlock(current->block[i], _FILE_TYPE_);
+            reportLs_indirect(file, pointer, level);
+            level++;
+        }
     }
 
     fprintf(file, "\t\t\t</table>\n");
@@ -954,12 +1006,12 @@ void reportLs()
 
 void reportJournal()
 {
-    char dotfile[20] = "ls_report.dot";
+    char dotfile[20] = "journal_report.dot";
     FILE * file;
     file = fopen(dotfile, "w");
 
     int start = session.part_start + sizeof(SuperBlock);
-    int count = session.sb->inodes_count * sizeof(Journal);
+    int count = session.sb->inodes_count;
 
     fprintf(file, "digraph {\n");
     fprintf(file, "\tgraph[pad=\"0.5\", nodesep=\"0.5\", ranksep=\"2\"]\n");
