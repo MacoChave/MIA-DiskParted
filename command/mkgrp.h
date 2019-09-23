@@ -26,7 +26,7 @@ void exec_mkgroup()
     int state = 0;
     for (int i = 0; i < 20; i++)
     {
-        state = permissions[i].id + 1;
+        state++;
         if (strcmp(permissions[i].group, values.name) == 0 && permissions[i].type == 'G')
         {
             if (permissions[i].id =! 0)
@@ -35,7 +35,7 @@ void exec_mkgroup()
                 return;
             }
         }
-        if (permissions[i].type = '0')
+        if (permissions[i].type == '0')
         {
             permissions[i].id = state;
             permissions[i].type = 'G';

@@ -1,6 +1,8 @@
 #ifndef RMGROUP_H
 #define RMGROUP_H
 
+#include <string.h>
+
 #include "../var/globals.h"
 #include "../fileManager/filesystem.h"
 

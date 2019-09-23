@@ -12,6 +12,8 @@
 #define MANAGER_H
 
 #include <stdio.h>
+#include <string.h>
+
 #include "../var/globals.h"
 
 /**
@@ -331,18 +333,20 @@ int updateGenericBlock(int n, void * block)
 void * getGenericBlock(int n, int type)
 {
     int start = session.sb->block_start + n * sizeof(DirectoryBlock);
-    void * block = NULL;
+    void * block = newDirectoryBlock(_EMPTY_, _EMPTY_);
 
     switch(type)
     {
         case _DIRECTORY_TYPE_:
-            block = newDirectoryBlock(_EMPTY_, _EMPTY_);
             break;
         case _FILE_TYPE_:
             block = newFileBlock();
             break;
         case _POINTER_TYPE_:
             block = newPointerBlock();
+            break;
+        default:
+            block = newFileBlock();
             break;
     }
 

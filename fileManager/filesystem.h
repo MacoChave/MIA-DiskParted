@@ -1,6 +1,8 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
+#include <string.h>
+
 #include "../var/globals.h"
 #include "../fileManager/manager.h"
 
@@ -162,7 +164,7 @@ void fs_writeFile(char text[], Inode * current, int no_current, int i)
         }
         else
         {
-            bf = (FileBlock *)getGenericBlock(current->block[i], _BLOCK_);
+            bf = (FileBlock *)getGenericBlock(current->block[i], _FILE_TYPE_);
             memset(bf->content, 0, 64);
         }
         strcpy(bf->content, text);
