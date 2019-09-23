@@ -2,6 +2,7 @@
 #define FILESYSTEM_H
 
 #include "../var/globals.h"
+#include "../fileManager/manager.h"
 
 /**
  * @brief Leer archivo de texto en sistema de archivos en apuntadores indirectos
@@ -775,4 +776,52 @@ int fs_getDirectoryByPath(char path[], char operation)
     }
     return no_next;
 }
+
+void fs_updatePermission()
+{
+    char perm[960] = {0};
+    char text[64] = {0};
+    
+    for (int i = 0; i < 20; i++)
+    {
+        if (permissions[i].type == '0') continue;
+
+        if (strlen(perm) == 0)
+            sprintf(perm, "%d,%c,%s", permissions[i].id, permissions[i].type, permissions[i].group);
+        else
+            sprintf(perm, "%s,%d,%c,%s", perm, permissions[i].id, permissions[i].type, permissions[i].group);
+        
+        if (permissions[i].type == 'U')
+        {
+            strcat(perm, ",");
+            strcat(perm, permissions[i].name);
+            strcat(perm, ",");
+            strcat(perm, permissions[i].pass);
+        }
+        strcat(perm, "\n");
+    }
+    
+    int pos = 0;
+
+    Inode * current = getInode(1);
+
+    for (int i = 0; i < 15; i++)
+    {
+        if (perm[pos] == 0) break;
+
+        for (int j = 0; j < 64; j++)
+        {
+            if (perm[pos] == 0) break;
+
+            char aux[3] = {perm[pos], '\0'};
+            strcat(text, aux);
+            pos++;
+        }
+        
+        fs_writeFile(text, current, 1, i);
+        memset(text, 0, 64);
+    }
+    
+}
+
 #endif // FILESYSTEM_H

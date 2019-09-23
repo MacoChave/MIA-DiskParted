@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include "../var/globals.h"
+#include "../var/filename.h"
 
 void exec_mkgroup()
 {
@@ -42,6 +43,8 @@ void exec_mkgroup()
             break;
         }
     }
+
+    fs_updatePermission();
     printf(ANSI_COLOR_GREEN "[i] Se creó el grupo %s\n" ANSI_COLOR_RESET, values.name);
 }
 
