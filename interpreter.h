@@ -23,6 +23,7 @@
 #include "command/mkfs.h"
 #include "command/login.h"
 #include "command/logout.h"
+#include "command/mkgrp.h"
 
 extern void exec_exec();
 
@@ -175,6 +176,7 @@ int loadCommand(char input[])
             }
             else
             {
+                // printf(ANSI_COLOR_BLUE "[d] %d\n" ANSI_COLOR_RESET, strcasecmp(auxiliar, "ruta"));
                 if (strcasecmp(auxiliar, "size") == 0)
                     param = _SIZE_;
                 else if (strcasecmp(auxiliar, "path") == 0)
@@ -208,13 +210,13 @@ int loadCommand(char input[])
                 else if (auxiliar[0] == 'p')
                     values.recursive = 1;
                 else if (strcasecmp(auxiliar, "cont") == 0)
-                    param == _CONT_;
+                    param = _CONT_;
                 else if (strcasecmp(auxiliar, "file") == 0)
-                    param == _FILE_;
+                    param = _FILE_;
                 else if (strcasecmp(auxiliar, "dest") == 0)
-                    param == _DEST_;
-                else if (auxiliar[0] == 'r' && strlen(auxiliar) > 1)
-                    param == _RUTA_;
+                    param = _DEST_;
+                else if (strcasecmp(auxiliar, "ruta") == 0)
+                    param = _RUTA_;
                 else if (auxiliar[0] == ' ')
                     printf(ANSI_COLOR_RED "[e] Parámetro %s no reconocido\n" ANSI_COLOR_RESET, auxiliar);
                 
@@ -364,6 +366,7 @@ int loadCommand(char input[])
             exec_logout();
             break;
         case _MKGRP_:
+            exec_mkgroup();
             break;
         case _MKUSR_:
             break;
