@@ -20,8 +20,8 @@ void initFileSystem()
 {
     /* CREAR INODE ROOT Y PRIMER BLOQUE */
     Inode * root = newInode(_DIRECTORY_TYPE_);
-    root->gid = 1;
-    root->uid = 2;
+    root->gid = 0;
+    root->uid = 1;
     root->permission = 777;
 
     DirectoryBlock * rootDir = newDirectoryBlock(0, 0);
@@ -44,8 +44,8 @@ void initFileSystem()
 
     int no_file = fs_createFile("users.txt", root, 0);
     Inode * file = getInode(no_file);
-    file->gid = 1;
-    file->uid = 2;
+    file->gid = 0;
+    file->uid = 1;
     updateInode(no_file, file);
     fs_writeFile(__USERTXT__, file, no_file, 0);
 }

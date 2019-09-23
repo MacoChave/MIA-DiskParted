@@ -658,8 +658,8 @@ int fs_checkPermission(int uid, int gid, int inode_permission, char operation)
     int u = str_perm[0] - '0';
     int g = str_perm[1] - '0';
     int o = str_perm[2] - '0';
-    int sameGroup = (permissions[session.id_group].id == gid) ? 1 : 0;
-    int userIsOwner = (permissions[session.id_user].id == uid) ? 1 : 0;
+    int sameGroup = (permissions[session.id_group].id == permissions[gid].id) ? 1 : 0;
+    int userIsOwner = (permissions[session.id_user].id == permissions[uid].id) ? 1 : 0;
 
     switch (operation)
     {

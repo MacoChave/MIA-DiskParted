@@ -167,7 +167,7 @@ int loadCommand(char input[])
         }
         else if (step == _PARAM_) // OBTENER TIPO PARAMETRO
         {
-            if (input[i] != '=')
+            if (input[i] != '=' && input[i] != ' ')
             {
                 strcat(auxiliar, current_char);
                 i++;
@@ -203,9 +203,9 @@ int loadCommand(char input[])
                     param = _GRP_;
                 else if (strcasecmp(auxiliar, "ugo") == 0)
                     param = _UGO_;
-                else if (strcasecmp(auxiliar, "r") == 0)
+                else if (auxiliar[0] == 'r')
                     values.recursive = 1;
-                else if (strcasecmp(auxiliar, "p") == 0)
+                else if (auxiliar[0] == 'p')
                     values.recursive = 1;
                 else if (strcasecmp(auxiliar, "cont") == 0)
                     param == _CONT_;
@@ -213,11 +213,15 @@ int loadCommand(char input[])
                     param == _FILE_;
                 else if (strcasecmp(auxiliar, "dest") == 0)
                     param == _DEST_;
-                else if (strcasecmp(auxiliar, "ruta") == 0)
+                else if (auxiliar[0] == 'r' && strlen(auxiliar) > 1)
                     param == _RUTA_;
-                else
+                else if (auxiliar[0] == ' ')
                     printf(ANSI_COLOR_RED "[e] Parámetro %s no reconocido\n" ANSI_COLOR_RESET, auxiliar);
                 
+                if (strcasecmp(auxiliar, "ruta") == 0) param = _RUTA_;
+                if (strcasecmp(auxiliar, "file") == 0) param = _FILE_;
+                if (strcasecmp(auxiliar, "cont") == 0) param = _CONT_;
+
                 memset(auxiliar, 0, 300);
                 step = _VALUE_;
                 i++;
@@ -300,6 +304,9 @@ int loadCommand(char input[])
                     case _DEST_:
                         strcpy(values.dest, auxiliar);
                         break;
+                    case _RUTA_:
+                        strcpy(values.ruta, auxiliar);
+                        break;
                     default:
                         break;
                 }
@@ -373,8 +380,12 @@ int loadCommand(char input[])
         case _RECOVERY_:
             break;
         default:
-            command = _ERROR_;
+        {
+            if (!comment) command = _ERROR_;
+            else command = _EMPTY_;
+            
             break;
+        }
     }
     clearValues();
     return command;

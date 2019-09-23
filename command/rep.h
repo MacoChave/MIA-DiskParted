@@ -361,12 +361,12 @@ void reportInodes()
 
         fprintf(file, "\t\t\t\t<tr>\n");
         fprintf(file, "\t\t\t\t\t<td>UID</td>\n");
-        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->uid);
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", permissions[current->uid].id);
         fprintf(file, "\t\t\t\t</tr>\n");
 
         fprintf(file, "\t\t\t\t<tr>\n");
         fprintf(file, "\t\t\t\t\t<td>GID</td>\n");
-        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->gid);
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", permissions[current->gid].id);
         fprintf(file, "\t\t\t\t</tr>\n");
 
         fprintf(file, "\t\t\t\t<tr>\n");
@@ -572,12 +572,12 @@ void reportTree()
 
         fprintf(file, "\t\t\t\t<tr>\n");
         fprintf(file, "\t\t\t\t\t<td>UID</td>\n");
-        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->uid);
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", permissions[current->uid].id);
         fprintf(file, "\t\t\t\t</tr>\n");
 
         fprintf(file, "\t\t\t\t<tr>\n");
         fprintf(file, "\t\t\t\t\t<td>GID</td>\n");
-        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->gid);
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", permissions[current->gid].id);
         fprintf(file, "\t\t\t\t</tr>\n");
 
         fprintf(file, "\t\t\t\t<tr>\n");
@@ -945,7 +945,6 @@ void reportLs()
     fprintf(file, "\t\t\t\t\t<td>Group</td>\n");
     fprintf(file, "\t\t\t\t\t<td>Size</td>\n");
     fprintf(file, "\t\t\t\t\t<td>Date</td>\n");
-    fprintf(file, "\t\t\t\t\t<td>Type</td>\n");
     fprintf(file, "\t\t\t\t\t<td>Name</td>\n");
     fprintf(file, "\t\t\t\t</tr>\n");
 
@@ -992,7 +991,7 @@ void reportLs()
     fprintf(file, "\t\t>\n");
     fprintf(file, "\t]\n");
 
-    fprintf(file, "]}\n");    
+    fprintf(file, "}\n");    
     fclose(file);
 
     char cmd[300] = {0};

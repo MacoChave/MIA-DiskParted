@@ -17,6 +17,8 @@ void exec_logout()
     session.id_group = 0;
     memset(session.path, 0, 300);
     session.sb = NULL;
+
+    printf(ANSI_COLOR_GREEN "[i] Sesión finalizada\n" ANSI_COLOR_RESET);
 }
 
 #endif //LOGOUT_H
