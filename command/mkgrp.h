@@ -34,6 +34,7 @@ void exec_mkgroup()
                 printf(ANSI_COLOR_RED "[e] Ya existe el grupo %s\n" ANSI_COLOR_RESET, values.name);
                 return;
             }
+            permissions[i].type = '0';
         }
         if (permissions[i].type == '0')
         {

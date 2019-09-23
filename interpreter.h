@@ -25,6 +25,7 @@
 #include "command/logout.h"
 #include "command/mkgrp.h"
 #include "command/rmgrp.h"
+#include "command/mkusr.h"
 
 extern void exec_exec();
 
@@ -370,6 +371,7 @@ int loadCommand(char input[])
             exec_mkgroup();
             break;
         case _MKUSR_:
+            exec_mkuser();
             break;
         case _RMGRP_:
             exec_rmgroup();
