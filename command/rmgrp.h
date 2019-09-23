@@ -30,7 +30,7 @@ void exec_rmgroup()
         {
             if (permissions[i].id == 0)
             {
-                printf(ANSI_COLOR_RED "[e] El grupo $s ya ha sido eliminado\n" ANSI_COLOR_RESET);
+                printf(ANSI_COLOR_RED "[e] El grupo %s ya ha sido eliminado\n" ANSI_COLOR_RESET);
                 return;
             }
             permissions[i].id = 0;
