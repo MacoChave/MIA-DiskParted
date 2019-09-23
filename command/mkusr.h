@@ -55,7 +55,7 @@ void exec_mkuser()
         {
             if (!existGroup)
             {
-                printf(ANSI_COLOR_RED "[e] El grupo %s no existe\n" ANSI_COLOR_RESET, values.grp;);
+                printf(ANSI_COLOR_RED "[e] El grupo %s no existe\n" ANSI_COLOR_RESET, values.grp);
             }
 
             permissions[i].id = id;

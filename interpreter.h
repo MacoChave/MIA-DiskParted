@@ -26,6 +26,7 @@
 #include "command/mkgrp.h"
 #include "command/rmgrp.h"
 #include "command/mkusr.h"
+#include "command/rmusr.h"
 
 extern void exec_exec();
 
@@ -377,6 +378,7 @@ int loadCommand(char input[])
             exec_rmgroup();
             break;
         case _RMUSR_:
+            exec_rmuser();
             break;
         case _MKDIR_:
             break;
