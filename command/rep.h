@@ -391,7 +391,7 @@ void reportInodes()
 
         fprintf(file, "\t\t\t\t<tr>\n");
         fprintf(file, "\t\t\t\t\t<td>Type</td>\n");
-        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->type + '0');
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->type);
         fprintf(file, "\t\t\t\t</tr>\n");
 
         fprintf(file, "\t\t\t\t<tr>\n");
@@ -602,7 +602,7 @@ void reportTree()
 
         fprintf(file, "\t\t\t\t<tr>\n");
         fprintf(file, "\t\t\t\t\t<td>Type</td>\n");
-        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->type + '0');
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->type);
         fprintf(file, "\t\t\t\t</tr>\n");
 
         fprintf(file, "\t\t\t\t<tr>\n");
@@ -919,7 +919,7 @@ void reportLs()
     }
 
     Inode * current = getInode(no_current);
-    if (current->type = _FILE_TYPE_)
+    if (current->type == _FILE_TYPE_)
     {
         printf(ANSI_COLOR_RED "[e] LS no se puede ejecutar sobre un archivo\n" ANSI_COLOR_RESET);
         return;
