@@ -10,7 +10,7 @@
 #include "../fileManager/mpartition.h"
 #include "../fileManager/filesystem.h"
 
-#define __USERTXT__ "1,G,root\n1,U,root,root,123\n"
+#define __USERTXT__ "1,G,root\n2,U,root,root,123\n"
 #define __SUPERBLOCK__ sizeof(SuperBlock)
 #define __JOURNAL__ sizeof(Journal)
 #define __INODE__ sizeof(Inode)
@@ -20,8 +20,8 @@ void initFileSystem()
 {
     /* CREAR INODE ROOT Y PRIMER BLOQUE */
     Inode * root = newInode(_DIRECTORY_TYPE_);
-    root->uid = 2;
     root->gid = 1;
+    root->uid = 2;
     root->permission = 777;
 
     DirectoryBlock * rootDir = newDirectoryBlock(0, 0);
@@ -44,6 +44,9 @@ void initFileSystem()
 
     int no_file = fs_createFile("users.txt", root, 0);
     Inode * file = getInode(no_file);
+    file->gid = 1;
+    file->uid = 2;
+    updateInode(no_file, file);
     fs_writeFile(__USERTXT__, file, no_file, 0);
 }
 
@@ -127,28 +130,11 @@ void exec_mkfs() {
     session.part_start = disks_mount[x].parts_mount[y].mount_start;
     session.part_size = disks_mount[x].parts_mount[y].mount_size;
 
-/* 
-    MBR mbr = getMBR(disks_mount[x].path);
-    Partition part;
-    int a;
-    for (a = 0; a < 4; a ++)
-    {
-        if (mbr.partitions[a].part_type == 'p')
-        {
-            if (strcmp(mbr.partitions[a].part_name, disks_mount[x].parts_mount[y].mount_name) == 0)
-            {
-                part = mbr.partitions[a];
-                break;
-            }
-        }
-    }
-
-    if (x == 4) return;
- */
-
     if (values.type != 'n')
         clearPartDisk(disks_mount[x].path, session.part_start, session.part_start + session.part_size);
     
+    session.id_group = 1;
+    session.id_user = 2;
     strcpy(session.path, disks_mount[x].path);
     settingSuperBlock();
     updateSuperBlock();
@@ -159,6 +145,7 @@ void exec_mkfs() {
     session.part_start = 0;
     session.part_size = 0;
     memset(session.path, 0, 300);
+    session.id_group = -1;
     session.id_user = -1;
 }
 

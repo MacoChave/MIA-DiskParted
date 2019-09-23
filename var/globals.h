@@ -220,8 +220,8 @@ DirectoryBlock * newDirectoryBlock(int current, int upper)
         strcpy(db->content[0].name, ".");
     }
     if (upper != _EMPTY_) {
-        db->content[0].inode = upper;
-        strcpy(db->content[0].name, "..");
+        db->content[1].inode = upper;
+        strcpy(db->content[1].name, "..");
     }
 
     return db;

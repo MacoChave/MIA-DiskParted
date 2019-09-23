@@ -17,7 +17,7 @@ Row rows[20];
 void initRows()
 {
     for (int i = 0; i < 20; i++)
-        memset(rows[i], 0, 40);
+        memset(rows[i].text, 0, 40);
 }
 
 void fillUsersTable()
@@ -115,6 +115,7 @@ void exec_login()
         return;
     }
 
+    strcpy(session.path, disks_mount[i].path);
     session.part_start = disks_mount[i].parts_mount[j].mount_start;
     session.part_size = disks_mount[i].parts_mount[j].mount_size;
     session.sb = getSuperBlock();
@@ -136,7 +137,7 @@ void exec_login()
         {
             if (strcmp(permissions[i].group, permissions[id_user].group) == 0)
             {
-                session.id_group = permissions[i].id;
+                session.id_group = i;
                 break;
             }
         }

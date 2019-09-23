@@ -391,7 +391,7 @@ void reportInodes()
 
         fprintf(file, "\t\t\t\t<tr>\n");
         fprintf(file, "\t\t\t\t\t<td>Type</td>\n");
-        fprintf(file, "\t\t\t\t\t<td>%c</td>\n", current->type);
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->type + '0');
         fprintf(file, "\t\t\t\t</tr>\n");
 
         fprintf(file, "\t\t\t\t<tr>\n");
@@ -449,6 +449,7 @@ void reportBlocks()
         Inode * current = getInode(i);
         for (int j = 0; j < 15; j++)
         {
+            // TODO: Reportar bloques indirectos
             if (current->block[j] < 0) continue;
 
             if (current->type == _FILE_TYPE_)
@@ -601,7 +602,7 @@ void reportTree()
 
         fprintf(file, "\t\t\t\t<tr>\n");
         fprintf(file, "\t\t\t\t\t<td>Type</td>\n");
-        fprintf(file, "\t\t\t\t\t<td>%c</td>\n", current->type);
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->type + '0');
         fprintf(file, "\t\t\t\t</tr>\n");
 
         fprintf(file, "\t\t\t\t<tr>\n");
@@ -609,7 +610,7 @@ void reportTree()
         fprintf(file, "\t\t\t\t\t<td>%d</td>\n", current->permission);
         fprintf(file, "\t\t\t\t</tr>\n");
 
-        for (int j = 0; j < 16; j++)
+        for (int j = 0; j < 15; j++)
         {
             if (current->block[j] < 0) continue;
             
@@ -625,6 +626,7 @@ void reportTree()
 
         for (int j = 0; j < 15; j++)
         {
+            // TODO: Reportar bloques indirectos
             if (current->block[j] < 0) continue;
 
             fprintf(file, "\n\tINODE_%d : %d -> BLOCK_%d\n\n", i, j, current->block[j]);
@@ -887,7 +889,7 @@ void reportLs_indirect(FILE * file, PointerBlock * current, int level)
                 Inode * child = getInode(block->content[i].inode);
                 
                 char str_perm[4] = {0};
-                strcpy(str_perm, "%d", child->permission);
+                sprintf(str_perm, "%d", child->permission);
 
                 fprintf(file, "\t\t\t\t<tr>\n");
                 if (child->type == _FILE_TYPE_)
@@ -962,7 +964,7 @@ void reportLs()
                 Inode * child = getInode(block->content[i].inode);
                 
                 char str_perm[4] = {0};
-                strcpy(str_perm, "%d", child->permission);
+                sprintf(str_perm, "%d", child->permission);
 
                 fprintf(file, "\t\t\t\t<tr>\n");
                 if (child->type == _FILE_TYPE_)
@@ -1120,7 +1122,7 @@ void exec_rep ()
     }
     
     /* REPORTES DE FASE 2 */
-    if (session.id_group != 1)
+    if (!(permissions[session.id_group].id == 1 || permissions[session.id_user].id == 2))
     {
         printf(ANSI_COLOR_RED "[e] Inicie sesión como root para generear el reporte\n" ANSI_COLOR_RESET);
         return;
@@ -1141,10 +1143,6 @@ void exec_rep ()
     }
     
     if (i == 4) return;
-    // strcpy(session.path, disks_mount[i].path);
-    // session.part_start = part.part_start;
-    // SuperBlock * sb = getSuperBlock();
-    // session.sb = sb;
 
     if (strcmp(values.name, "inode") == 0)
         reportInodes();

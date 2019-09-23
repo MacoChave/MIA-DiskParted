@@ -21,6 +21,8 @@
 #include "command/unmount.h"
 #include "command/rep.h"
 #include "command/mkfs.h"
+#include "command/login.h"
+#include "command/logout.h"
 
 extern void exec_exec();
 
@@ -211,6 +213,8 @@ int loadCommand(char input[])
                     param == _FILE_;
                 else if (strcasecmp(auxiliar, "dest") == 0)
                     param == _DEST_;
+                else if (strcasecmp(auxiliar, "ruta") == 0)
+                    param == _RUTA_;
                 else
                     printf(ANSI_COLOR_RED "[e] Parámetro %s no reconocido\n" ANSI_COLOR_RESET, auxiliar);
                 
@@ -347,8 +351,10 @@ int loadCommand(char input[])
             exec_mkfs();
             break;
         case _LOGIN_:
+            exec_login();
             break;
         case _LOGOUT_:
+            exec_logout();
             break;
         case _MKGRP_:
             break;
