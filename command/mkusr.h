@@ -74,7 +74,7 @@ void exec_mkuser()
     strcpy(journal->str_1, values.usr);
     strcpy(journal->str_2, values.pwd);
     strcpy(journal->date, values.grp);
-    backup(journal);
+    fs_backup(journal);
 
     printf(ANSI_COLOR_GREEN "[i] Se creó el usuario %s\n" ANSI_COLOR_RESET, values.usr);
 }

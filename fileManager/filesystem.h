@@ -825,7 +825,7 @@ void fs_updatePermission()
     }
 }
 
-void backup(Journal * journal)
+void fs_backup(Journal * journal)
 {
     int start = session.part_start + __SUPERBLOCK__;
     int end = session.sb->inodes_count;

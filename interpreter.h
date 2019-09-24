@@ -27,6 +27,7 @@
 #include "command/rmgrp.h"
 #include "command/mkusr.h"
 #include "command/rmusr.h"
+#include "command/mkdir.h"
 
 extern void exec_exec();
 
@@ -381,6 +382,7 @@ int loadCommand(char input[])
             exec_rmuser();
             break;
         case _MKDIR_:
+            exec_mkdir();
             break;
         case _MKFILE_:
             break;
