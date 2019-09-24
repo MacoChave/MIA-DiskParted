@@ -46,6 +46,12 @@ void exec_mkgroup()
     }
 
     fs_updatePermission();
+
+    Journal * journal = newJournal();
+    journal->command = _MKGRP_;
+    strcpy(journal->str_1, values.name);
+    backup(journal);
+
     printf(ANSI_COLOR_GREEN "[i] Se creó el grupo %s\n" ANSI_COLOR_RESET, values.name);
 }
 

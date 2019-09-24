@@ -823,7 +823,24 @@ void fs_updatePermission()
         fs_writeFile(text, current, 1, i);
         memset(text, 0, 64);
     }
-    
+}
+
+void backup(Journal * journal)
+{
+    int start = session.part_start + __SUPERBLOCK__;
+    int end = session.sb->inodes_count;
+
+    Journal * current = NULL;
+
+    for(int i = 0; i < end; i++)
+    {
+        current = getJournal(start);
+        if (current == NULL || current->command == _EMPTY_) break;
+
+        start += __JOURNAL__;
+    }
+
+    updateJournal(journal, start);
 }
 
 #endif // FILESYSTEM_H

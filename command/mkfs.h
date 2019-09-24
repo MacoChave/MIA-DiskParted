@@ -11,10 +11,6 @@
 #include "../fileManager/filesystem.h"
 
 #define __USERTXT__ "1,G,root\n2,U,root,root,123\n"
-#define __SUPERBLOCK__ sizeof(SuperBlock)
-#define __JOURNAL__ sizeof(Journal)
-#define __INODE__ sizeof(Inode)
-#define __GENBLOCK__ sizeof(DirectoryBlock)
 
 void initFileSystem()
 {

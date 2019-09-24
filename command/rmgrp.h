@@ -38,6 +38,12 @@ void exec_rmgroup()
     }
 
     fs_updatePermission();
+
+    Journal * journal = newJournal();
+    journal->command = _RMGRP_;
+    strcpy(journal->str_1, values.name);
+    backup(journal);
+
     printf(ANSI_COLOR_GREEN "[i] Se eliminó el grupo %s\n" ANSI_COLOR_RESET, values.name);
 }
 

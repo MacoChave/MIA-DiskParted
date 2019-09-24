@@ -80,6 +80,12 @@
 #define __UPDATE__ 'U'
 #define __DELETE__ 'D'
 
+/* TAMAÑOS DE ESTRUCTURAS */
+#define __SUPERBLOCK__ sizeof(SuperBlock)
+#define __JOURNAL__ sizeof(Journal)
+#define __INODE__ sizeof(Inode)
+#define __GENBLOCK__ sizeof(DirectoryBlock)
+
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
