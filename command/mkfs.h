@@ -138,6 +138,8 @@ void exec_mkfs() {
     settingBitmaps();
     initFileSystem();
 
+    printf(ANSI_COLOR_GREEN "[i] Se ha formateado la partición %s\n" ANSI_COLOR_RESET, values.id);
+
     session.part_start = 0;
     session.part_size = 0;
     memset(session.path, 0, 300);

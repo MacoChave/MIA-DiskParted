@@ -7,7 +7,7 @@
 
 void exec_mkdir()
 {
-    if (session.id_user < 0)
+    if (session.id_user <= 0)
     {
         printf(ANSI_COLOR_RED "[e] No hay sesión activa\n" ANSI_COLOR_RESET);
         return;
@@ -30,7 +30,7 @@ void exec_mkdir()
         printf(ANSI_COLOR_GREEN "[i] Se ha creado el directorio %s\n" ANSI_COLOR_RESET, values.path);
     }
     else 
-        printf(ANSI_COLOR_GREEN "[i] No se ha creado el directorio %s\n" ANSI_COLOR_RESET, values.path);
+        printf(ANSI_COLOR_RED "[i] No se ha creado el directorio %s\n" ANSI_COLOR_RESET, values.path);
 }
 
 #endif //MKDIR_H

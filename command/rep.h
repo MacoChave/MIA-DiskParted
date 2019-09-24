@@ -1121,9 +1121,9 @@ void exec_rep ()
     }
     
     /* REPORTES DE FASE 2 */
-    if (!(permissions[session.id_group].id == 1 || permissions[session.id_user].id == 2))
+    if (session.id_user <= 0)
     {
-        printf(ANSI_COLOR_RED "[e] Inicie sesión como root para generear el reporte\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[e] No hay sesión activa\n" ANSI_COLOR_RESET);
         return;
     }
 
@@ -1144,23 +1144,79 @@ void exec_rep ()
     if (i == 4) return;
 
     if (strcmp(values.name, "inode") == 0)
+    {
+        if (strcmp(permissions[session.id_user].group, "root") != 0)
+        {
+            printf(ANSI_COLOR_RED "[e] Reporte solo para usuarios root\n" ANSI_COLOR_RESET);
+            return;
+        }
+
         reportInodes();
+    }
     else if (strcmp(values.name, "block") == 0)
+    {
+        if (strcmp(permissions[session.id_user].group, "root") != 0)
+        {
+            printf(ANSI_COLOR_RED "[e] Reporte solo para usuarios root\n" ANSI_COLOR_RESET);
+            return;
+        }
+
         reportBlocks();
+    }
     else if (strcmp(values.name, "bm_inode") == 0)
+    {
+        if (strcmp(permissions[session.id_user].group, "root") != 0)
+        {
+            printf(ANSI_COLOR_RED "[e] Reporte solo para usuarios root\n" ANSI_COLOR_RESET);
+            return;
+        }
+
         reportBitmap(_INODE_);
+    }
     else if (strcmp(values.name, "bm_block") == 0)
+    {
+        if (strcmp(permissions[session.id_user].group, "root") != 0)
+        {
+            printf(ANSI_COLOR_RED "[e] Reporte solo para usuarios root\n" ANSI_COLOR_RESET);
+            return;
+        }
+
         reportBitmap(_BLOCK_);
+    }
     else if (strcmp(values.name, "tree") == 0)
+    {
+        if (strcmp(permissions[session.id_user].group, "root") != 0)
+        {
+            printf(ANSI_COLOR_RED "[e] Reporte solo para usuarios root\n" ANSI_COLOR_RESET);
+            return;
+        }
+
         reportTree();
+    }
     else if (strcmp(values.name, "sb") == 0)
+    {
+        if (strcmp(permissions[session.id_user].group, "root") != 0)
+        {
+            printf(ANSI_COLOR_RED "[e] Reporte solo para usuarios root\n" ANSI_COLOR_RESET);
+            return;
+        }
+
         reportSuperBlock();
+    }
     else if (strcmp(values.name, "file") == 0)
         reportFile();
     else if (strcmp(values.name, "ls") == 0)
         reportLs();
     else if (strcmp(values.name, "journaling") == 0)
+    {
+        if (strcmp(permissions[session.id_user].group, "root") != 0)
+        {
+            printf(ANSI_COLOR_RED "[e] Reporte solo para usuarios root\n" ANSI_COLOR_RESET);
+            return;
+        }
+
         reportJournal();
+    }
 
     clearSpaceDisk();
 }

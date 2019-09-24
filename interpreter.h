@@ -209,9 +209,9 @@ int loadCommand(char input[])
                     param = _GRP_;
                 else if (strcasecmp(auxiliar, "ugo") == 0)
                     param = _UGO_;
-                else if (auxiliar[0] == 'r')
+                else if (auxiliar[0] == 'r' && strlen(auxiliar) == 1)
                     values.recursive = 1;
-                else if (auxiliar[0] == 'p')
+                else if (auxiliar[0] == 'p' && strlen(auxiliar) == 1)
                     values.recursive = 1;
                 else if (strcasecmp(auxiliar, "cont") == 0)
                     param = _CONT_;
@@ -228,8 +228,8 @@ int loadCommand(char input[])
                 if (strcasecmp(auxiliar, "file") == 0) param = _FILE_;
                 if (strcasecmp(auxiliar, "cont") == 0) param = _CONT_;
 
+                step = (strlen(auxiliar) == 1) ? _PARAM_ : _VALUE_;
                 memset(auxiliar, 0, 300);
-                step = _VALUE_;
                 i++;
                 continue;
             }

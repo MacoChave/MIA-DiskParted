@@ -158,7 +158,7 @@ void clearValues()
     values.fs = '2';
     values.size = 0;
     values.add = 0;
-    values.recursive = -1;
+    values.recursive = 0;
     // command = -1;
 }
 

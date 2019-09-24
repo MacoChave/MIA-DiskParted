@@ -92,7 +92,7 @@ int validateUser()
 
 void exec_login()
 {
-    if (session.id_user >= 0)
+    if (session.id_user > 0)
     {
         printf(ANSI_COLOR_RED "[e] Cierre sesión antes de iniciar una nueva sesión\n" ANSI_COLOR_RESET);
         return;

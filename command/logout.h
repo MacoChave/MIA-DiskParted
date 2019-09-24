@@ -5,7 +5,7 @@
 
 void exec_logout()
 {
-    if (session.id_user < 0)
+    if (session.id_user <= 0)
     {
         printf(ANSI_COLOR_RED "[e] No hay sesion activa\n" ANSI_COLOR_RESET);
         return;
