@@ -2,6 +2,7 @@
 #define FILESYSTEM_H
 
 #include <string.h>
+#include <time.h>
 
 #include "../var/globals.h"
 #include "../fileManager/manager.h"
@@ -828,14 +829,18 @@ void fs_updatePermission()
 void fs_backup(Journal * journal)
 {
     int start = session.part_start + __SUPERBLOCK__;
-    int end = session.sb->inodes_count;
+    int count = session.sb->inodes_count;
+
+    __time_t currentDate = time(NULL);
+    struct tm * date = localtime(&currentDate);
+    strftime(journal->date, sizeof(journal->date), "%d/%m/%y %H:%M", date);
 
     Journal * current = NULL;
 
-    for(int i = 0; i < end; i++)
+    for(int i = 0; i < count; i++)
     {
         current = getJournal(start);
-        if (current == NULL || current->command == _EMPTY_) break;
+        if (current->command == _EMPTY_) break;
 
         start += __JOURNAL__;
     }

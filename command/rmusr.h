@@ -41,7 +41,7 @@ void exec_rmuser()
 
     Journal * journal = newJournal();
     journal->command = _RMUSR_;
-    strcpy(journal->str_1, values.name);
+    strcpy(journal->str_1, values.usr);
     fs_backup(journal);
 
     printf(ANSI_COLOR_GREEN "[i] Se eliminó el usuario %s\n" ANSI_COLOR_RESET, values.usr);

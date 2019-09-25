@@ -1011,7 +1011,7 @@ void reportJournal()
     FILE * file;
     file = fopen(dotfile, "w");
 
-    int start = session.part_start + sizeof(SuperBlock);
+    int start = session.part_start + __SUPERBLOCK__;
     int count = session.sb->inodes_count;
 
     fprintf(file, "digraph {\n");
@@ -1025,22 +1025,23 @@ void reportJournal()
     
     fprintf(file, "\t\t\t\t<tr>\n");
     fprintf(file, "\t\t\t\t\t<td>Operation</td>\n");
-    fprintf(file, "\t\t\t\t\t<td>Name</td>\n");
-    fprintf(file, "\t\t\t\t\t<td>Content</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>String 1</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>String 2</td>\n");
     fprintf(file, "\t\t\t\t\t<td>Date</td>\n");
     fprintf(file, "\t\t\t\t\t<td>Permission</td>\n");
     fprintf(file, "\t\t\t\t\t<td>Owner</td>\n");
     fprintf(file, "\t\t\t\t\t<td>Size</td>\n");
     fprintf(file, "\t\t\t\t</tr>\n");
 
-    Journal *journal;
+    Journal * journal = NULL;
+
     for (int i = 0; i < count; i++)
     {
         journal = getJournal(start);
-        if (journal->command == _ERROR_) return;
+        if (journal->command == _EMPTY_) break;
 
         fprintf(file, "\t\t\t\t<tr>\n");
-        fprintf(file, "\t\t\t\t\t<td>%c</td>\n", journal->command);
+        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", journal->command);
         fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->str_1);
         fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->str_2);
         fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->date);
@@ -1049,7 +1050,7 @@ void reportJournal()
         fprintf(file, "\t\t\t\t\t<td>%d</td>\n", journal->size);
         fprintf(file, "\t\t\t\t</tr>\n");
 
-        start += sizeof(journal);
+        start += __JOURNAL__;
     }
 
     fprintf(file, "\t\t\t</table>\n");
