@@ -654,8 +654,7 @@ int fs_createFile(char name[], Inode * current, int no_current)
  */
 int fs_checkPermission(int uid, int gid, int inode_permission, char operation)
 {
-    if (strcmp(permissions[session.id_user].group, "root") == 0) return 1;
-    else if (strcmp(permissions[session.id_group].group, "root") == 0) return 1;
+    if (strcmp(permissions[session.id_group].group, "root") == 0) return 1;
     
     char str_perm[4];
     sprintf(str_perm, "%d", inode_permission);
@@ -722,7 +721,7 @@ int fs_createDirectoryFromPath(char path[], int isRecursive, char inodeType, cha
         {
             if (isRecursive || (operation == __CREATE__ && pivot == lenght_path))
             {
-                if (!hasPermission && no_container != 0) return -1;
+                if (!hasPermission) return -1;
                 if (inodeType == _DIRECTORY_TYPE_)
                 {
                     no_next = fs_createDirectory(str_path, current, no_container);
@@ -738,7 +737,7 @@ int fs_createDirectoryFromPath(char path[], int isRecursive, char inodeType, cha
         }
         else
         {
-            if (!hasPermission && no_container != 0) return -1;
+            if (!hasPermission) return -1;
             current = getInode(no_next);
             if (current->type == _FILE_TYPE_) return no_next;
         }
