@@ -28,6 +28,8 @@
 #include "command/mkusr.h"
 #include "command/rmusr.h"
 #include "command/mkdir.h"
+#include "command/mkfile.h"
+#include "command/cat.h"
 
 extern void exec_exec();
 
@@ -385,6 +387,10 @@ int loadCommand(char input[])
             exec_mkdir();
             break;
         case _MKFILE_:
+            exec_mkfile();
+            break;
+        case _CAT_:
+            exec_cat();
             break;
         case _LOSS_:
             break;
