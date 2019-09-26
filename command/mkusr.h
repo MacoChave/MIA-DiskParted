@@ -18,7 +18,7 @@ void exec_mkuser()
         printf(ANSI_COLOR_RED "[e] Inicie sesión como usuario root\n" ANSI_COLOR_RESET);
         return;
     }
-    if (strlen(values.usr) <= 0 && strlen(values.pwd) <= 0 && strlen(values.grp) <= 0)
+    if (strlen(values.usr) == 0 || strlen(values.pwd) == 0 || strlen(values.grp) == 0)
     {
         printf(ANSI_COLOR_RED "[e] Parámetro incompletos\n" ANSI_COLOR_RESET);
         return;

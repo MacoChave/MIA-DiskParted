@@ -1077,7 +1077,7 @@ void reportJournal()
  */
 void exec_rep ()
 {
-    if (strlen(values.name) <= 0 || strlen(values.path) <= 0 || strlen(values.id) <= 0)
+    if (strlen(values.name) == 0 || strlen(values.path) == 0 || strlen(values.id) == 0)
     {
         printf(ANSI_COLOR_RED "[e] Parámetros incompletos\n" ANSI_COLOR_RESET);
         return;

@@ -18,7 +18,7 @@ void exec_rmuser()
         printf(ANSI_COLOR_RED "[e] Inicie sesión como usuario root\n" ANSI_COLOR_RESET);
         return;
     }
-    if (strlen(values.usr) <= 0)
+    if (strlen(values.usr) == 0)
     {
         printf(ANSI_COLOR_RED "[e] Parámetro usuario requerido\n" ANSI_COLOR_RESET);
         return;

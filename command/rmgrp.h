@@ -18,7 +18,7 @@ void exec_rmgroup()
         printf(ANSI_COLOR_RED "[e] Inicie sesión como usuario root\n" ANSI_COLOR_RESET);
         return;
     }
-    if (strlen(values.name) <= 0)
+    if (strlen(values.name) == 0)
     {
         printf(ANSI_COLOR_RED "[e] Parámetro name obligatorio\n" ANSI_COLOR_RESET);
         return;

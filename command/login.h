@@ -97,7 +97,7 @@ void exec_login()
         printf(ANSI_COLOR_RED "[e] Cierre sesión antes de iniciar una nueva sesión\n" ANSI_COLOR_RESET);
         return;
     }
-    if (strlen(values.usr) <= 0 || strlen(values.pwd) <= 0 || strlen(values.id) <= 0)
+    if (strlen(values.usr) == 0 || strlen(values.pwd) == 0 || strlen(values.id) == 0)
     {
         printf(ANSI_COLOR_RED "[e] La partición %s no se encuentra montada\n" ANSI_COLOR_RESET, values.id);
         return;
