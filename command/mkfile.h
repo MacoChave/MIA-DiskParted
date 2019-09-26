@@ -1,7 +1,7 @@
 #ifndef MKFILE_H
 #define MKFILE_H
 
-#include "../var/globals.h";
+#include "../var/globals.h"
 #include "../fileManager/filesystem.h"
 
 void exec_mkfile()

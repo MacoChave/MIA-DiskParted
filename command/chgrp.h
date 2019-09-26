@@ -11,7 +11,7 @@ void exec_chgrp()
         printf(ANSI_COLOR_RED "[e] No hay sesión activa\n" ANSI_COLOR_RESET);
         return;
     }
-    if (strcmp(permissions[session.id_user], "root") != 0)
+    if (strcmp(permissions[session.id_user].group, "root") != 0)
     {
         printf(ANSI_COLOR_RED "[e] No tiene permisos\n" ANSI_COLOR_RESET);
         return;
