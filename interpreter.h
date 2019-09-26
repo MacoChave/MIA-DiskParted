@@ -30,6 +30,7 @@
 #include "command/mkdir.h"
 #include "command/mkfile.h"
 #include "command/cat.h"
+#include "command/chgrp.h"
 
 extern void exec_exec();
 
@@ -391,6 +392,9 @@ int loadCommand(char input[])
             break;
         case _CAT_:
             exec_cat();
+            break;
+        case _CHGRP_:
+            exec_chgrp();
             break;
         case _LOSS_:
             break;
