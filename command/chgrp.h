@@ -29,7 +29,7 @@ void exec_chgrp()
     {
         if (permissions[id_grp].type == 'G')
         {
-            if (strcmp(permissions[id_grp].name, values.grp) == 0 && permissions[id_grp].id > 0)
+            if (strcmp(permissions[id_grp].group, values.grp) == 0 && permissions[id_grp].id > 0)
                 break;
         }
     }
