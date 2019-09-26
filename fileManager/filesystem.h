@@ -722,7 +722,7 @@ int fs_createDirectoryFromPath(char path[], int isRecursive, char inodeType, cha
             if (isRecursive || (operation == __CREATE__ && pivot == lenght_path))
             {
                 if (!hasPermission) return -1;
-                if (inodeType == _DIRECTORY_TYPE_)
+                if (inodeType == _DIRECTORY_TYPE_ || pivot != lenght_path)
                 {
                     no_next = fs_createDirectory(str_path, current, no_container);
                     current = getInode(no_next);
