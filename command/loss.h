@@ -6,6 +6,7 @@
 #include "../var/globals.h"
 #include "../fileManager/filesystem.h"
 #include "../fileManager/manager.h"
+#include "logout.h"
 
 void lossPartition()
 {
@@ -17,14 +18,12 @@ void lossPartition()
 
 void exec_loss()
 {
-    if (strcmp(permissions[session.id_user].group, "root") != 0)
-    {
-        printf(ANSI_COLOR_RED "[e] No hay sesión activa\n" ANSI_COLOR_RESET);
-        return;
-    }
+    if (strcmp(session.id_user <= 0))
+        exec_logout();
 
     lossPartition();
     printf(ANSI_COLOR_GREEN "[i] Se ha simulado la pérdida con éxito\n" ANSI_COLOR_RESET);
+
 }
 
 #endif //LOSS_H
