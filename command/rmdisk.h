@@ -21,7 +21,7 @@
  */
 void exec_rmdisk()
 {
-    if (strlen(values.path) <= 0)
+    if (strlen(values.path) == 0)
     {
         printf(ANSI_COLOR_RED "[e] Path requerido\n" ANSI_COLOR_RESET);
         return;

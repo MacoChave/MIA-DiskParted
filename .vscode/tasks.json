@@ -11,7 +11,8 @@
                 "main.c",
                 "-g",
                 "-o",
-                "build/disk_parted.out"
+                "build/disk_parted.out",
+                "-lm"
             ],
             "problemMatcher": [
                 "$gcc"

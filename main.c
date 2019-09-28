@@ -10,12 +10,14 @@
  */
 int main() 
 {
+    initSession();
     initDisksMount();
+    initPermissionlist();
     clearValues();
     printf("---> Disk Parted <---\n");
     char input[999] = "";
     int exit = 0;
-    while (exit >= 0)
+    while (exit != _EXIT_)
     {
         fgets(input, 999, stdin);
         exit = loadCommand(input);

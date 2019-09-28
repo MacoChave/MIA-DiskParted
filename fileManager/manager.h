@@ -12,6 +12,8 @@
 #define MANAGER_H
 
 #include <stdio.h>
+#include <string.h>
+
 #include "../var/globals.h"
 
 /**
@@ -113,8 +115,9 @@ int clearPartDisk(char path[], int start, int size)
     {
         char buffer[1024];
         memset(buffer, 0, 1024);
+        fseek(file, start, SEEK_SET);
 
-        for (int i = start; i < size / 1024; i++)
+        for (int i = 0; i < size / 1024; i++)
         {
             fwrite(buffer, sizeof(buffer), 1, file);
             fflush(file);
@@ -231,6 +234,265 @@ EBR getEBR (char path[], int start)
     }
 
     return ebr;
+}
+
+int updateSuperBlock()
+{
+    FILE * file;
+    file = fopen(session.path, "rb+");
+
+    if (file != NULL)
+    {
+        fseek(file, session.part_start, SEEK_SET);
+        fwrite(session.sb, sizeof(SuperBlock), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+SuperBlock * getSuperBlock()
+{
+    session.sb = newSuperBlock();
+    FILE * file;
+    file = fopen(session.path, "rb");
+
+    if (file != NULL)
+    {
+        fseek(file, session.part_start, SEEK_SET);
+        fread(session.sb, sizeof(SuperBlock), 1, file);
+        fclose(file);
+
+        return session.sb;
+    }
+
+    return session.sb;
+}
+
+int updateInode(int n, Inode * in)
+{
+    n = (n == _EMPTY_) ? 
+        session.sb->first_inode : n;
+    int start = session.sb->inode_start + n * sizeof(Inode);
+
+    FILE * file;
+    file = fopen(session.path, "rb+");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fwrite(in, sizeof(Inode), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+Inode * getInode(int n)
+{
+    int start = session.sb->inode_start + n * sizeof(Inode);
+    Inode * in = newInode(_DIRECTORY_TYPE_);
+    
+    FILE * file;
+    file = fopen(session.path, "rb");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fread(in, sizeof(Inode), 1, file);
+        fclose(file);
+
+        return in;
+    }
+
+    return in;
+}
+
+int updateGenericBlock(int n, void * block)
+{
+    n = (n == _EMPTY_) ? 
+        session.sb->first_block : n;
+    int start = session.sb->block_start + n * sizeof(DirectoryBlock);
+
+    FILE * file;
+    file = fopen(session.path, "rb+");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fwrite(block, sizeof(DirectoryBlock), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+void * getGenericBlock(int n, int type)
+{
+    int start = session.sb->block_start + n * sizeof(DirectoryBlock);
+    void * block = newDirectoryBlock(_EMPTY_, _EMPTY_);
+
+    switch(type)
+    {
+        case _DIRECTORY_TYPE_:
+            break;
+        case _FILE_TYPE_:
+            block = newFileBlock();
+            break;
+        case _POINTER_TYPE_:
+            block = newPointerBlock();
+            break;
+        default:
+            block = newFileBlock();
+            break;
+    }
+
+    FILE * file;
+    file = fopen(session.path, "rb");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fread(block, sizeof(DirectoryBlock), 1, file);
+        fclose(file);
+
+        return block;
+    }
+
+    return block;
+}
+
+int clearJournals(int start, int count)
+{
+    FILE * file;
+    file = fopen(session.path, "rb+");
+
+    if (file != NULL)
+    {
+        Journal * jounal = newJournal();
+        fseek(file, start, SEEK_SET);
+        for (int i = 0; i < count; i++)
+            fwrite(jounal, sizeof(Journal), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+int updateJournal(Journal * journal, int start)
+{
+    FILE * file;
+    file = fopen(session.path, "rb+");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fwrite(journal, sizeof(Journal), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+Journal * getJournal(int start)
+{
+    Journal * journal = newJournal();
+    FILE * file;
+    file = fopen(session.path, "rb");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fread(journal, sizeof(Journal), 1, file);
+        fclose(file);
+
+        return journal;
+    }
+
+    return journal;
+}
+
+int updateBitmap(int n, char state, int type)
+{
+    int start = (type == _BLOCK_) ? 
+        session.sb->bm_block_start + n : 
+        session.sb->bm_inode_start + n;
+    
+    FILE * file;
+    file = fopen(session.path, "rb+");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fwrite(&state, sizeof(char), 1, file);
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+char getBitmap(int n, int type)
+{
+    int start = (type == _BLOCK_) ? 
+        session.sb->bm_block_start + n : 
+        session.sb->bm_inode_start + n;
+    
+    char state = '0';
+    FILE * file;
+    file = fopen(session.path, "rb");
+
+    if (file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        fread(&state, sizeof(char), 1, file);
+        fclose(file);
+
+        return state;
+    }
+
+    return state;
+}
+
+int getNextFreeBit_Bitmap(int type)
+{
+    char bit = '-';
+    int i = 0;
+    int start = 0;
+    int end = 0;
+    if (type == _BLOCK_)
+    {
+        start = session.sb->bm_block_start;
+        end = session.sb->blocks_count;
+    }
+    else 
+    {
+        start = session.sb->bm_inode_start;
+        end = session.sb->inodes_count;
+    }
+
+    FILE * file;
+    file = fopen(session.path, "rb");
+
+    if(file != NULL)
+    {
+        fseek(file, start, SEEK_SET);
+        while (i < end)
+        {
+            fread(&bit, sizeof(char), 1, file);
+            if (bit == '0') break;
+            i++;
+        }
+        fclose(file);
+        return i;
+    }
+
+    return i;
 }
 
 #endif

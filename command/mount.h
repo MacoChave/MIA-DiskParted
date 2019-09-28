@@ -135,10 +135,14 @@ void showMountedPartition()
 {
     for (int i = 0; i < 10; i++)
     {
-        printf(ANSI_COLOR_BLUE "sd%c\n" ANSI_COLOR_RESET, disks_mount[i].letter);
+        if (disks_mount[i].letter == '0') continue;
+
+        printf(ANSI_COLOR_BLUE "vd%c\n" ANSI_COLOR_RESET, disks_mount[i].letter);
         for (int j = 0; j < 20; j++)
         {
-            printf(ANSI_COLOR_BLUE "\tsd%c%d\n" ANSI_COLOR_RESET, disks_mount[i].letter, disks_mount[i].parts_mount[j].mount_id);
+            if (disks_mount[i].parts_mount[j].mount_id == 0) continue;
+            
+            printf(ANSI_COLOR_BLUE "\tvd%c%d\n" ANSI_COLOR_RESET, disks_mount[i].letter, disks_mount[i].parts_mount[j].mount_id);
         }
     }    
 }
@@ -164,6 +168,7 @@ void exec_mount()
     MBR mbr = getMBR(values.path);
 
     mounting(mbr);
+    showMountedPartition();
 }
 
 #endif

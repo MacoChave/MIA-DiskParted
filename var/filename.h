@@ -16,8 +16,7 @@
 #include <string.h>
 
 /**
- * @brief Obtiene el directorio de una ruta
- * /Proyectos/Code/Fragmentos_C/main.c -> /Proyectos/Code/Fragmentos_C
+ * @brief Obtiene el directorio de una ruta /Proyectos/Code/Fragmentos_C/main.c -> /Proyectos/Code/Fragmentos_C
  * @param path 
  * @return char* 
  */
@@ -47,8 +46,7 @@ char * getDirectoryFilename(char path[]) {
 }
 
 /**
- * @brief Obtiene el nombre de archivo de una ruta
- * /Proyectos/Code/Fragmentos_C/main.c -> main
+ * @brief Obtiene el nombre de archivo de una ruta /Proyectos/Code/Fragmentos_C/main.c -> main
  * 
  */
 char * getFileFilename(char path[]) {
@@ -78,8 +76,7 @@ char * getFileFilename(char path[]) {
 }
 
 /**
- * @brief Obtiene el tipo de archivo de una ruta
- * /Proyectos/Code/Fragmentos_C/main.c -> c
+ * @brief Obtiene el tipo de archivo de una ruta /Proyectos/Code/Fragmentos_C/main.c -> c
  * 
  * @param path 
  * @return char* 
