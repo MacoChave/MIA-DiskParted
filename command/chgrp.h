@@ -55,7 +55,8 @@ void exec_chgrp()
         journal->owner = session.id_user;
         strcpy(journal->str_1, values.usr);
         strcpy(journal->str_2, values.grp);
-        fs_backup(journal);
+        if (command != _RECOVERY_)
+            fs_backup(journal);
 
         return;
     }

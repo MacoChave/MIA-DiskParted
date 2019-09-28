@@ -27,7 +27,8 @@ void exec_mkdir()
 
     if (result > 0)
     {
-        fs_backup(journal);
+        if (command != _RECOVERY_)
+            fs_backup(journal);
         printf(ANSI_COLOR_GREEN "[i] Se ha creado el directorio %s\n" ANSI_COLOR_RESET, journal->str_1);
     }
     else 

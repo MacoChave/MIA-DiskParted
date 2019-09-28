@@ -39,10 +39,13 @@ void exec_rmuser()
 
     fs_updatePermission();
 
-    Journal * journal = newJournal();
-    journal->command = _RMUSR_;
-    strcpy(journal->str_1, values.usr);
-    fs_backup(journal);
+    if (command != _RECOVERY_)
+    {
+        Journal * journal = newJournal();
+        journal->command = _RMUSR_;
+        strcpy(journal->str_1, values.usr);
+        fs_backup(journal);
+    }
 
     printf(ANSI_COLOR_GREEN "[i] Se eliminó el usuario %s\n" ANSI_COLOR_RESET, values.usr);
 }

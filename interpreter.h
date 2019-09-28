@@ -31,6 +31,8 @@
 #include "command/mkfile.h"
 #include "command/cat.h"
 #include "command/chgrp.h"
+#include "command/loss.h"
+#include "command/recovery.h"
 
 extern void exec_exec();
 
@@ -397,8 +399,10 @@ int loadCommand(char input[])
             exec_chgrp();
             break;
         case _LOSS_:
+            exec_loss();
             break;
         case _RECOVERY_:
+            exec_recovery();
             break;
         default:
         {

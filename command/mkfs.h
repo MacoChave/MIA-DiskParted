@@ -127,7 +127,7 @@ void exec_mkfs() {
     session.part_size = disks_mount[x].parts_mount[y].mount_size;
 
     if (values.type != 'n')
-        clearPartDisk(disks_mount[x].path, session.part_start, session.part_start + session.part_size);
+        clearPartDisk(disks_mount[x].path, session.part_start, session.part_size);
     
     session.id_group = 1;
     session.id_user = 2;

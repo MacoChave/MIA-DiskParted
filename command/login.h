@@ -90,6 +90,21 @@ int validateUser()
     return -1;
 }
 
+void getIdGroup()
+{
+    for (int i = 0; i < 20; i++)
+    {
+        if (permissions[i].type == 'G')
+        {
+            if (strcmp(permissions[i].group, permissions[session.id_user].group) == 0)
+            {
+                session.id_group = i;
+                break;
+            }
+        }
+    }
+}
+
 void exec_login()
 {
     if (session.id_user > 0)
@@ -131,17 +146,7 @@ void exec_login()
     }
 
     session.id_user = id_user;
-    for (int i = 0; i < 20; i++)
-    {
-        if (permissions[i].type == 'G')
-        {
-            if (strcmp(permissions[i].group, permissions[id_user].group) == 0)
-            {
-                session.id_group = i;
-                break;
-            }
-        }
-    }
+    getIdGroup();
 
     printf(ANSI_COLOR_GREEN "[i] Usuario %s logueado\n" ANSI_COLOR_RESET, values.usr);
 }

@@ -18,12 +18,40 @@ void lossPartition()
 
 void exec_loss()
 {
-    if (strcmp(session.id_user <= 0))
-        exec_logout();
+    exec_logout();
+    
+    if (strlen(values.id) == 0)
+    {
+        printf(ANSI_COLOR_RED "[e] Se requiere id de partición\n" ANSI_COLOR_RESET);
+        return;
+    }
+    
+    char id_x = values.id[2];
+    char id_y = values.id[3] - '0';
 
+    int x = getDiskById(id_x);
+    int y = getPartById(id_y, x);
+
+    if (y == _ERROR_)
+    {
+        printf(ANSI_COLOR_RED "[e] La partición %s no está montada\n" ANSI_COLOR_RESET, values.id);
+        return;
+    }
+
+    session.part_start = disks_mount[x].parts_mount[y].mount_start;
+    session.part_size = disks_mount[x].parts_mount[y].mount_size;
+
+    SuperBlock * sb = getSuperBlock();
+    if (sb->magic != 0)
+    {
+        printf(ANSI_COLOR_RED "[e] La partición no contiene un sistema de archivos\n" ANSI_COLOR_RESET);
+        return;
+    }
+    
+    session.sb = sb;
     lossPartition();
-    printf(ANSI_COLOR_GREEN "[i] Se ha simulado la pérdida con éxito\n" ANSI_COLOR_RESET);
 
+    printf(ANSI_COLOR_GREEN "[i] Se ha simulado la pérdida con éxito\n" ANSI_COLOR_RESET);
 }
 
 #endif //LOSS_H

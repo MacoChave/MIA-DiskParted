@@ -38,7 +38,8 @@ void exec_mkfile()
         generateContent_size(values.size, current, result);
     
     printf(ANSI_COLOR_GREEN "[i] Se ha creado el archivo %s\n" ANSI_COLOR_RESET, journal->str_1);
-    fs_backup(journal);
+    if (command != _RECOVERY_)
+        fs_backup(journal);
 }
 
 #endif //MKFILE_H
