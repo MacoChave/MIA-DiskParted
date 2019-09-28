@@ -428,8 +428,93 @@ void reportInodes()
     system(cmd);
 }
 
+void reportBlocks_Indirect(FILE * file, int no_current, PointerBlock * current, int type, int level)
+{
+        for (int i = 0; i < 16; i++)
+    {
+        if (current->pointers[i] < 0) continue;
+
+        if (level > 1)
+        {
+            PointerBlock * pb = (PointerBlock *) getGenericBlock(current->pointers[i], _POINTER_TYPE_);
+
+            fprintf(file, "\tBLOCK_%d [\n", pb->pointers[i]);
+            fprintf(file, "\t\tlabel = <\n");
+            fprintf(file, "\t\t\t<table bgcolor = \"teal\">\n");
+            
+            fprintf(file, "\t\t\t\t<tr>\n");
+            fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", pb->pointers[i]);
+            fprintf(file, "\t\t\t\t</tr>\n");
+
+            for (int z = 0; z < 16; z++)
+            {
+                fprintf(file, "\t\t\t\t<tr>\n");
+                fprintf(file, "\t\t\t\t\t<td>%d</td>\n", pb->pointers[z]);
+                fprintf(file, "\t\t\t\t</tr>\n");
+            }
+
+            fprintf(file, "\t\t\t</table>\n");
+            fprintf(file, "\t\t>\n");
+            fprintf(file, "\t]\n");
+            
+            reportTree_Indirect(file, current->pointers[i], pb, type, level - 1);
+        }
+        else 
+        {
+            for (int j = 0; j < 15; j++)
+            {
+                if (type == _FILE_TYPE_)
+                {
+                    FileBlock * bf = (FileBlock *) getGenericBlock(current->pointers[j], _FILE_TYPE_);
+
+                    fprintf(file, "\tBLOCK_%d [\n", current->pointers[j]);
+                    fprintf(file, "\t\tlabel = <\n");
+                    fprintf(file, "\t\t\t<table bgcolor = \"salmon\">\n");
+                    
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td>Block %d</td>\n", current->pointers[j]);
+                    fprintf(file, "\t\t\t\t</tr>\n");
+
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bf->content);
+                    fprintf(file, "\t\t\t\t</tr>\n");
+
+                    fprintf(file, "\t\t\t</table>\n");
+                    fprintf(file, "\t\t>\n");
+                    fprintf(file, "\t]\n");
+                }
+                else if (type == _DIRECTORY_TYPE_)
+                {
+                    DirectoryBlock * bd = (DirectoryBlock *) getGenericBlock(current->pointers[j], _DIRECTORY_TYPE_);
+
+                    fprintf(file, "\tBLOCK_%d [\n", current->pointers[j]);
+                    fprintf(file, "\t\tlabel = <\n");
+                    fprintf(file, "\t\t\t<table bgcolor = \"skyblue\">\n");
+                    
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", current->pointers[j]);
+                    fprintf(file, "\t\t\t\t</tr>\n");
+
+                    for (int z = 0; z < 4; z++)
+                    {
+                        fprintf(file, "\t\t\t\t<tr>\n");
+                        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bd->content[z].name);
+                        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", z, bd->content[z].inode);
+                        fprintf(file, "\t\t\t\t</tr>\n");
+                    }
+
+                    fprintf(file, "\t\t\t</table>\n");
+                    fprintf(file, "\t\t>\n");
+                    fprintf(file, "\t]\n");
+                }
+            }                    
+        }
+    }
+}
+
 void reportBlocks()
 {
+    int level = 1;
     char dotfile[20] = "block_report.dot";
     FILE * file;
     file = fopen(dotfile, "w");
@@ -449,32 +534,58 @@ void reportBlocks()
         Inode * current = getInode(i);
         for (int j = 0; j < 15; j++)
         {
-            // TODO: Reportar bloques indirectos
             if (current->block[j] < 0) continue;
 
-            if (current->type == _FILE_TYPE_)
+            if (i < 12)
             {
-                FileBlock * bf = (FileBlock *) getGenericBlock(current->block[j], _FILE_TYPE_);
+                if (current->type == _FILE_TYPE_)
+                {
+                    FileBlock * bf = (FileBlock *) getGenericBlock(current->block[j], _FILE_TYPE_);
 
-                fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
-                fprintf(file, "\t\tlabel = <\n");
-                fprintf(file, "\t\t\t<table bgcolor = \"salmon\">\n");
-                
-                fprintf(file, "\t\t\t\t<tr>\n");
-                fprintf(file, "\t\t\t\t\t<td>Block %d</td>\n", current->block[j]);
-                fprintf(file, "\t\t\t\t</tr>\n");
+                    fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
+                    fprintf(file, "\t\tlabel = <\n");
+                    fprintf(file, "\t\t\t<table bgcolor = \"salmon\">\n");
+                    
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td>Block %d</td>\n", current->block[j]);
+                    fprintf(file, "\t\t\t\t</tr>\n");
 
-                fprintf(file, "\t\t\t\t<tr>\n");
-                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bf->content);
-                fprintf(file, "\t\t\t\t</tr>\n");
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bf->content);
+                    fprintf(file, "\t\t\t\t</tr>\n");
 
-                fprintf(file, "\t\t\t</table>\n");
-                fprintf(file, "\t\t>\n");
-                fprintf(file, "\t]\n");
+                    fprintf(file, "\t\t\t</table>\n");
+                    fprintf(file, "\t\t>\n");
+                    fprintf(file, "\t]\n");
+                }
+                else if (current->type == _DIRECTORY_TYPE_)
+                {
+                    DirectoryBlock * bd = (DirectoryBlock *) getGenericBlock(current->block[j], _DIRECTORY_TYPE_);
+
+                    fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
+                    fprintf(file, "\t\tlabel = <\n");
+                    fprintf(file, "\t\t\t<table bgcolor = \"skyblue\">\n");
+                    
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", current->block[j]);
+                    fprintf(file, "\t\t\t\t</tr>\n");
+
+                    for (int z = 0; z < 4; z++)
+                    {
+                        fprintf(file, "\t\t\t\t<tr>\n");
+                        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bd->content[z].name);
+                        fprintf(file, "\t\t\t\t\t<td>%d</td>\n", bd->content[z].inode);
+                        fprintf(file, "\t\t\t\t</tr>\n");
+                    }
+
+                    fprintf(file, "\t\t\t</table>\n");
+                    fprintf(file, "\t\t>\n");
+                    fprintf(file, "\t]\n");
+                }
             }
-            else if (current->type == _DIRECTORY_TYPE_)
+            else 
             {
-                DirectoryBlock * bd = (DirectoryBlock *) getGenericBlock(current->block[j], _DIRECTORY_TYPE_);
+                PointerBlock * pb = (PointerBlock *) getGenericBlock(current->block[j], _POINTER_TYPE_);
 
                 fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
                 fprintf(file, "\t\tlabel = <\n");
@@ -487,14 +598,17 @@ void reportBlocks()
                 for (int z = 0; z < 4; z++)
                 {
                     fprintf(file, "\t\t\t\t<tr>\n");
-                    fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bd->content[z].name);
-                    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", bd->content[z].inode);
+                    fprintf(file, "\t\t\t\t\t<td>%d</td>\n", pb->pointers[z]);
                     fprintf(file, "\t\t\t\t</tr>\n");
                 }
 
                 fprintf(file, "\t\t\t</table>\n");
                 fprintf(file, "\t\t>\n");
                 fprintf(file, "\t]\n");
+
+                reportBlocks_Indirect(file, current->block[j], pb, current->type, level);
+
+                level++;
             }
         }        
     }
@@ -539,8 +653,110 @@ void reportBitmap(char type)
     fclose(file);
 }
 
+void reportTree_Indirect(FILE * file, int no_current, PointerBlock * current, int type, int level)
+{
+    for (int i = 0; i < 16; i++)
+    {
+        if (current->pointers[i] < 0) continue;
+
+        if (level > 1)
+        {
+            PointerBlock * pb = (PointerBlock *) getGenericBlock(current->pointers[i], _POINTER_TYPE_);
+
+            fprintf(file, "\tBLOCK_%d [\n", pb->pointers[i]);
+            fprintf(file, "\t\tlabel = <\n");
+            fprintf(file, "\t\t\t<table bgcolor = \"teal\">\n");
+            
+            fprintf(file, "\t\t\t\t<tr>\n");
+            fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", pb->pointers[i]);
+            fprintf(file, "\t\t\t\t</tr>\n");
+
+            for (int z = 0; z < 16; z++)
+            {
+                fprintf(file, "\t\t\t\t<tr>\n");
+                fprintf(file, "\t\t\t\t\t<td port = '%d'>%d</td>\n", z, pb->pointers[z]);
+                fprintf(file, "\t\t\t\t</tr>\n");
+            }
+
+            fprintf(file, "\t\t\t</table>\n");
+            fprintf(file, "\t\t>\n");
+            fprintf(file, "\t]\n");
+
+            for (int z = 0; z < 16; z++)
+            {
+                if (pb->pointers[z] < 0) continue;
+
+                fprintf(file, "\n\tBLOCK_%d : %d -> BLOCK_%d\n\n", no_current, z, pb->pointers[z]);
+            }
+            
+            reportTree_Indirect(file, current->pointers[i], pb, type, level - 1);
+        }
+        else 
+        {
+            for (int j = 0; j < 15; j++)
+            {
+                fprintf(file, "\n\tBLOCK_%d : %d -> BLOCK_%d\n\n", no_current, j, current->pointers[j]);
+
+                if (type == _FILE_TYPE_)
+                {
+                    FileBlock * bf = (FileBlock *) getGenericBlock(current->pointers[j], _FILE_TYPE_);
+
+                    fprintf(file, "\tBLOCK_%d [\n", current->pointers[j]);
+                    fprintf(file, "\t\tlabel = <\n");
+                    fprintf(file, "\t\t\t<table bgcolor = \"salmon\">\n");
+                    
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td>Block %d</td>\n", current->pointers[j]);
+                    fprintf(file, "\t\t\t\t</tr>\n");
+
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bf->content);
+                    fprintf(file, "\t\t\t\t</tr>\n");
+
+                    fprintf(file, "\t\t\t</table>\n");
+                    fprintf(file, "\t\t>\n");
+                    fprintf(file, "\t]\n");
+                }
+                else if (type == _DIRECTORY_TYPE_)
+                {
+                    DirectoryBlock * bd = (DirectoryBlock *) getGenericBlock(current->pointers[j], _DIRECTORY_TYPE_);
+
+                    fprintf(file, "\tBLOCK_%d [\n", current->pointers[j]);
+                    fprintf(file, "\t\tlabel = <\n");
+                    fprintf(file, "\t\t\t<table bgcolor = \"skyblue\">\n");
+                    
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", current->pointers[j]);
+                    fprintf(file, "\t\t\t\t</tr>\n");
+
+                    for (int z = 0; z < 4; z++)
+                    {
+                        fprintf(file, "\t\t\t\t<tr>\n");
+                        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bd->content[z].name);
+                        fprintf(file, "\t\t\t\t\t<td port = '%d'>%d</td>\n", z, bd->content[z].inode);
+                        fprintf(file, "\t\t\t\t</tr>\n");
+                    }
+
+                    fprintf(file, "\t\t\t</table>\n");
+                    fprintf(file, "\t\t>\n");
+                    fprintf(file, "\t]\n");
+
+                    for (int z = 0; z < 4; z++)
+                    {
+                        if (bd->content[z].inode == -1) continue;
+                        if (bd->content[z].name[0] == '.') continue;
+
+                        fprintf(file, "\n\tBLOCK_%d : %d -> INODE_%d\n", current->pointers[j], z, bd->content[z].inode);
+                    }
+                }
+            }                    
+        }
+    }
+}
+
 void reportTree()
 {
+    int level = 1;
     char dotfile[20] = "tree_report.dot";
     FILE * file;
     file = fopen(dotfile, "w");
@@ -626,34 +842,68 @@ void reportTree()
 
         for (int j = 0; j < 15; j++)
         {
-            // TODO: Reportar bloques indirectos
             if (current->block[j] < 0) continue;
 
             fprintf(file, "\n\tINODE_%d : %d -> BLOCK_%d\n\n", i, j, current->block[j]);
 
-            if (current->type == _FILE_TYPE_)
+            if (j < 12)
             {
-                FileBlock * bf = (FileBlock *) getGenericBlock(current->block[j], _FILE_TYPE_);
+                if (current->type == _FILE_TYPE_)
+                {
+                    FileBlock * bf = (FileBlock *) getGenericBlock(current->block[j], _FILE_TYPE_);
 
-                fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
-                fprintf(file, "\t\tlabel = <\n");
-                fprintf(file, "\t\t\t<table bgcolor = \"salmon\">\n");
-                
-                fprintf(file, "\t\t\t\t<tr>\n");
-                fprintf(file, "\t\t\t\t\t<td>Block %d</td>\n", current->block[j]);
-                fprintf(file, "\t\t\t\t</tr>\n");
+                    fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
+                    fprintf(file, "\t\tlabel = <\n");
+                    fprintf(file, "\t\t\t<table bgcolor = \"salmon\">\n");
+                    
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td>Block %d</td>\n", current->block[j]);
+                    fprintf(file, "\t\t\t\t</tr>\n");
 
-                fprintf(file, "\t\t\t\t<tr>\n");
-                fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bf->content);
-                fprintf(file, "\t\t\t\t</tr>\n");
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bf->content);
+                    fprintf(file, "\t\t\t\t</tr>\n");
 
-                fprintf(file, "\t\t\t</table>\n");
-                fprintf(file, "\t\t>\n");
-                fprintf(file, "\t]\n");
+                    fprintf(file, "\t\t\t</table>\n");
+                    fprintf(file, "\t\t>\n");
+                    fprintf(file, "\t]\n");
+                }
+                else if (current->type == _DIRECTORY_TYPE_)
+                {
+                    DirectoryBlock * bd = (DirectoryBlock *) getGenericBlock(current->block[j], _DIRECTORY_TYPE_);
+
+                    fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
+                    fprintf(file, "\t\tlabel = <\n");
+                    fprintf(file, "\t\t\t<table bgcolor = \"skyblue\">\n");
+                    
+                    fprintf(file, "\t\t\t\t<tr>\n");
+                    fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", current->block[j]);
+                    fprintf(file, "\t\t\t\t</tr>\n");
+
+                    for (int z = 0; z < 4; z++)
+                    {
+                        fprintf(file, "\t\t\t\t<tr>\n");
+                        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bd->content[z].name);
+                        fprintf(file, "\t\t\t\t\t<td port = '%d'>%d</td>\n", z, bd->content[z].inode);
+                        fprintf(file, "\t\t\t\t</tr>\n");
+                    }
+
+                    fprintf(file, "\t\t\t</table>\n");
+                    fprintf(file, "\t\t>\n");
+                    fprintf(file, "\t]\n");
+
+                    for (int z = 0; z < 4; z++)
+                    {
+                        if (bd->content[z].inode == -1) continue;
+                        if (bd->content[z].name[0] == '.') continue;
+
+                        fprintf(file, "\n\tBLOCK_%d : %d -> INODE_%d\n", current->block[j], z, bd->content[z].inode);
+                    }
+                }
             }
-            else if (current->type == _DIRECTORY_TYPE_)
+            else
             {
-                DirectoryBlock * bd = (DirectoryBlock *) getGenericBlock(current->block[j], _DIRECTORY_TYPE_);
+                PointerBlock * pb = (PointerBlock *) getGenericBlock(current->block[j], _POINTER_TYPE_);
 
                 fprintf(file, "\tBLOCK_%d [\n", current->block[j]);
                 fprintf(file, "\t\tlabel = <\n");
@@ -666,8 +916,7 @@ void reportTree()
                 for (int z = 0; z < 4; z++)
                 {
                     fprintf(file, "\t\t\t\t<tr>\n");
-                    fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bd->content[z].name);
-                    fprintf(file, "\t\t\t\t\t<td port = '%d'>%d</td>\n", z, bd->content[z].inode);
+                    fprintf(file, "\t\t\t\t\t<td port = '%d'>%d</td>\n", z, pb->pointers[z]);
                     fprintf(file, "\t\t\t\t</tr>\n");
                 }
 
@@ -675,13 +924,9 @@ void reportTree()
                 fprintf(file, "\t\t>\n");
                 fprintf(file, "\t]\n");
 
-                for (int z = 0; z < 4; z++)
-                {
-                    if (bd->content[z].inode == -1) continue;
-                    if (bd->content[z].name[0] == '.') continue;
+                reportTree_Indirect(file, current->block[j], pb, current->type, level);
 
-                    fprintf(file, "\n\tBLOCK_%d : %d -> INODE_%d\n", current->block[j], z, bd->content[z].inode);
-                }
+                level++;
             }
         }        
     }
