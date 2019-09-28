@@ -19,6 +19,7 @@ void lossPartition()
 void exec_loss()
 {
     exec_logout();
+    initPermissionlist();
     
     if (strlen(values.id) == 0)
     {
@@ -40,9 +41,10 @@ void exec_loss()
 
     session.part_start = disks_mount[x].parts_mount[y].mount_start;
     session.part_size = disks_mount[x].parts_mount[y].mount_size;
+    strcpy(session.path, disks_mount[x].path);
 
     SuperBlock * sb = getSuperBlock();
-    if (sb->magic != 0)
+    if (sb->magic <= 0)
     {
         printf(ANSI_COLOR_RED "[e] La partición no contiene un sistema de archivos\n" ANSI_COLOR_RESET);
         return;

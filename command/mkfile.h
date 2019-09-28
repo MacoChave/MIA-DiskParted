@@ -21,6 +21,7 @@ void exec_mkfile()
     journal->command = _MKFILE_;
     journal->owner = session.id_user;
     journal->size = values.size;
+    journal->recursive = values.recursive;
     strcpy(journal->str_1, values.path);
     strcpy(journal->str_2, values.cont);
 

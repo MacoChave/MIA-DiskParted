@@ -21,6 +21,7 @@ void exec_mkdir()
     Journal * journal = newJournal();
     journal->command = _MKDIR_;
     journal->owner = session.id_user;
+    journal->recursive = values.recursive;
     strcpy(journal->str_1, values.path);
     
     int result = fs_createDirectoryFromPath(values.path, values.recursive, _DIRECTORY_TYPE_, __CREATE__);
@@ -32,7 +33,7 @@ void exec_mkdir()
         printf(ANSI_COLOR_GREEN "[i] Se ha creado el directorio %s\n" ANSI_COLOR_RESET, journal->str_1);
     }
     else 
-        printf(ANSI_COLOR_RED "[i] No se ha creado el directorio %s\n" ANSI_COLOR_RESET, journal->str_1);
+        printf(ANSI_COLOR_RED "[e] No se ha creado el directorio %s\n" ANSI_COLOR_RESET, journal->str_1);
 }
 
 #endif //MKDIR_H

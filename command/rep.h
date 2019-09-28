@@ -1027,6 +1027,7 @@ void reportJournal()
     fprintf(file, "\t\t\t\t\t<td>Operation</td>\n");
     fprintf(file, "\t\t\t\t\t<td>String 1</td>\n");
     fprintf(file, "\t\t\t\t\t<td>String 2</td>\n");
+    fprintf(file, "\t\t\t\t\t<td>String 3</td>\n");
     fprintf(file, "\t\t\t\t\t<td>Date</td>\n");
     fprintf(file, "\t\t\t\t\t<td>Permission</td>\n");
     fprintf(file, "\t\t\t\t\t<td>Owner</td>\n");
@@ -1044,6 +1045,7 @@ void reportJournal()
         fprintf(file, "\t\t\t\t\t<td>%d</td>\n", journal->command);
         fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->str_1);
         fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->str_2);
+        fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->str_3);
         fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->date);
         fprintf(file, "\t\t\t\t\t<td>%s</td>\n", journal->ugo);
         fprintf(file, "\t\t\t\t\t<td>%d</td>\n", journal->owner);

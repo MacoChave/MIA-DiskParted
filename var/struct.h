@@ -141,8 +141,10 @@ struct Journal
 {
     char str_1[200];
     char str_2[200];
+    char str_3[20];
     char date[16];
     char ugo[3];
+    int recursive;
     int owner;
     int command;
     int size;

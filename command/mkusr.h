@@ -75,7 +75,7 @@ void exec_mkuser()
         journal->command = _MKUSR_;
         strcpy(journal->str_1, values.usr);
         strcpy(journal->str_2, values.pwd);
-        strcpy(journal->date, values.grp);
+        strcpy(journal->str_3, values.grp);
         fs_backup(journal);
     }
 

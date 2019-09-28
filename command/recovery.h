@@ -5,6 +5,7 @@
 
 #include "mkfs.h"
 #include "login.h"
+#include "logout.h"
 #include "mkgrp.h"
 #include "mkusr.h"
 #include "rmgrp.h"
@@ -37,35 +38,43 @@ void extractJournal()
         {
             case _MKGRP_:
             {
-                session.id_group = 1;
-                session.id_user = 2;
+                session.id_group = 0;
+                session.id_user = 1;
                 strcpy(values.name, current->str_1);
+                initPermissionlist();
+                fillUsersTable();
                 exec_mkgroup();
                 break;
             }
             case _MKUSR_:
             {
-                session.id_group = 1;
-                session.id_user = 2;
+                session.id_group = 0;
+                session.id_user = 1;
                 strcpy(values.usr, current->str_1);
                 strcpy(values.pwd, current->str_2);
-                strcpy(values.grp, current->date);
+                strcpy(values.grp, current->str_3);
+                initPermissionlist();
+                fillUsersTable();
                 exec_mkuser();
                 break;
             }
             case _RMGRP_:
             {
-                session.id_group = 1;
+                session.id_group = 0;
                 session.id_user = 1;
                 strcpy(values.name, current->str_1);
+                initPermissionlist();
+                fillUsersTable();
                 exec_rmgroup();
                 break;
             }
             case _RMUSR_:
             {
-                session.id_group = 1;
-                session.id_user = 2;
+                session.id_group = 0;
+                session.id_user = 1;
                 strcpy(values.usr, current->str_1);
+                initPermissionlist();
+                fillUsersTable();
                 exec_rmuser();
                 break;
             }
@@ -74,6 +83,9 @@ void extractJournal()
                 session.id_user = current->owner;
                 getIdGroup();
                 strcpy(values.path, current->str_1);
+                values.recursive = current->recursive;
+                initPermissionlist();
+                fillUsersTable();
                 exec_mkdir();
                 break;
             }
@@ -84,6 +96,9 @@ void extractJournal()
                 values.size = current->size;
                 strcpy(values.path, current->str_1);
                 strcpy(values.cont, current->str_2);
+                values.recursive = current->recursive;
+                initPermissionlist();
+                fillUsersTable();
                 exec_mkfile();
                 break;
             }
@@ -93,6 +108,8 @@ void extractJournal()
                 getIdGroup();
                 strcpy(values.usr, current->str_1);
                 strcpy(values.grp, current->str_2);
+                initPermissionlist();
+                fillUsersTable();
                 exec_chgrp();
                 break;
             }
@@ -126,10 +143,11 @@ void exec_recovery()
 
     session.part_start = disks_mount[x].parts_mount[y].mount_start;
     session.part_size = disks_mount[x].parts_mount[y].mount_size;
+    strcpy(session.path, disks_mount[x].path);
 
     SuperBlock * sb = getSuperBlock();
 
-    if (sb->magic != 0)
+    if (sb->magic <= 0)
     {
         printf("[e] La partición no contiene un sistema de archivos\n");
         return;
@@ -137,6 +155,7 @@ void exec_recovery()
 
     recovery_struct();
     extractJournal();
+    exec_logout();
 }
 
 #endif //RECOVERY_H
