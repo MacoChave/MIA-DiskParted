@@ -208,17 +208,23 @@ void generateContent_cont(char cont[300], Inode * current, int no_current)
     char text[64] = {0};
     FILE * file = fopen(cont, "r");
 
+    current->size = 0;
+
     if (file != NULL)
     {
         while(!feof(file) || i < 12){
             fgets(text, 64, file);
             size += strlen(text);
             if (strlen(text) > 0)
+            {
                 fs_writeFile(text, current, no_current, i);
+                current->size += strlen(text);
+            }
             memset(text, 0, 64);
             i++;
         }
         
+        updateInode(no_current, current);
         fclose(file);
     }
 }
@@ -233,7 +239,7 @@ void generateContent_cont(char cont[300], Inode * current, int no_current)
 void generateContent_size(int size, Inode * current, int no_current)
 {
     char text[64] = {0};
-
+    current->size = size;
     int blocks_count = size / 64;
     if (size % 64 > 0)
         blocks_count++;
@@ -256,6 +262,8 @@ void generateContent_size(int size, Inode * current, int no_current)
             fs_writeFile(text, current, no_current, i); */
             // TODO: Limpiar resto del contenido sin ustilizar
     }
+
+    updateInode(no_current, current);
 }
 
 /**
