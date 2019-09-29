@@ -201,7 +201,7 @@ void fs_writeFile(char text[], Inode * current, int no_current, int i)
  * @param current 
  * @param no_current 
  */
-void generateContent_cont(char cont[300], Inode * current, int no_current)
+void fs_generateContent_cont(char cont[300], Inode * current, int no_current)
 {
     int i = 0;
     int size = 0;
@@ -236,7 +236,7 @@ void generateContent_cont(char cont[300], Inode * current, int no_current)
  * @param current 
  * @param no_current 
  */
-void generateContent_size(int size, Inode * current, int no_current)
+void fs_generateContent_size(int size, Inode * current, int no_current)
 {
     char text[64] = {0};
     current->size = size;
@@ -258,12 +258,62 @@ void generateContent_size(int size, Inode * current, int no_current)
             fs_writeFile(text, current, no_current, i);
             memset(text, 0, 64);
         }
-/*         else
-            fs_writeFile(text, current, no_current, i); */
+        else
+        {
             // TODO: Limpiar resto del contenido sin ustilizar
+            
+        }
     }
 
     updateInode(no_current, current);
+}
+
+void fs_pushContent_Indirect(char content[], PointerBlock * current, int no_current, int level)
+{
+
+}
+
+void fs_pushContent(char content[], Inode * current, int no_current)
+{
+    int i = (current->size / 64) + 1;
+
+    if (i < 12)
+    {
+        FileBlock * bf = NULL;
+        current->size += strlen(content);
+
+        if (current->block[i] < 0)
+        {
+            bf = newFileBlock();
+            current->block[i] = session.sb->first_block;
+            updateInode(no_current, current);
+            updateGenericBlock(_EMPTY_, bf);
+            updateBitmap(current->block[i], '1', _BLOCK_);
+            session.sb->free_blocks -= 1;
+            session.sb->first_block = getNextFreeBit_Bitmap(_BLOCK_);
+        }
+        else
+            bf = (FileBlock *) getGenericBlock(current->block[i], _DIRECTORY_TYPE_);
+        
+        strcat(bf->content, content);
+        updateGenericBlock(current->block[i], bf);
+    }
+    else
+    {
+        i -= 12;
+        // PTRS DIRECTOS   12       768
+        // 1ROS INDIRECTOS 16       1024
+        // 2DOS INDIRECTOS 256      16384
+        // 3ROS INDIRECTOS 4096     262144
+ 
+        /*
+         * 320
+         * 384
+         * 
+         * 350
+         * 34
+         */
+    }
 }
 
 /**

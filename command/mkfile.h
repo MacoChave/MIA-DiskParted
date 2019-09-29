@@ -8,7 +8,7 @@ void exec_mkfile()
 {
     if (session.id_group < 0)
     {
-        printf(ANSI_COLOR_RED "[e] No sesión activa\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[e] No hay sesión activa\n" ANSI_COLOR_RESET);
         return;
     }
     if (strlen(values.path) == 0)
@@ -34,9 +34,9 @@ void exec_mkfile()
 
     Inode * current = getInode(result);
     if (strlen(values.cont) > 0)
-        generateContent_cont(values.cont, current, result);
+        fs_generateContent_cont(values.cont, current, result);
     else if (values.size > 0)
-        generateContent_size(values.size, current, result);
+        fs_generateContent_size(values.size, current, result);
     
     printf(ANSI_COLOR_GREEN "[i] Se ha creado el archivo %s\n" ANSI_COLOR_RESET, journal->str_1);
     if (command != _RECOVERY_)
