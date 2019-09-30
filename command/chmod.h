@@ -45,15 +45,14 @@ void exec_chmod()
         return;
     }
 
-    // TODO: Cambiar permiso / Copiar carpeta o archivo
     current->permission = atoi(values.ugo);
-    // TODO: Si es carpeta, entrar el inodo
     if (current->type == _DIRECTORY_TYPE_)
         fs_traversalTree(current, command, atoi(values.ugo));
     
     updateInode(no_inode, current);
+    fs_backup(journal);
 
-    printf(ANSI_COLOR_GREEN "[e] Se cambio permisos a %s\n" ANSI_COLOR_RESET, journal->str_1);
+    printf(ANSI_COLOR_GREEN "[i] Se cambio permisos a %s\n" ANSI_COLOR_RESET, journal->str_1);
 }
 
 #endif //CHMOD_H

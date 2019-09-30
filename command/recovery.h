@@ -10,6 +10,9 @@
 #include "mkusr.h"
 #include "rmgrp.h"
 #include "rmusr.h"
+#include "chmod.h"
+#include "edit.h"
+#include "ren.h"
 
 void recovery_struct()
 {
@@ -111,6 +114,39 @@ void extractJournal()
                 initPermissionlist();
                 fillUsersTable();
                 exec_chgrp();
+                break;
+            }
+            case _CHMOD_:
+            {
+                session.id_user = current->owner;
+                getIdGroup();
+                strcpy(values.path, current->str_1);
+                strcpy(values.ugo, current->ugo);
+                initPermissionlist();
+                fillUsersTable();
+                exec_chmod();
+                break;
+            }
+            case _EDIT_:
+            {
+                session.id_user = current->owner;
+                getIdGroup();
+                strcpy(values.path, current->str_1);
+                strcpy(values.cont, current->str_2);
+                initPermissionlist();
+                fillUsersTable();
+                exec_edit();
+                break;
+            }
+            case _REN_:
+            {
+                session.id_user = current->owner;
+                getIdGroup();
+                strcpy(values.path, current->str_1);
+                strcpy(values.name, current->str_2);
+                initPermissionlist();
+                fillUsersTable();
+                exec_ren();
                 break;
             }
             default:
