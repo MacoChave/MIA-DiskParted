@@ -34,6 +34,7 @@ void exec_chmod()
     journal->owner = session.id_user;
     strcpy(journal->str_1, values.path);
     strcpy(journal->ugo, values.ugo);
+    journal->recursive = values.recursive;
 
     int no_block = 0;
     int ptr_inode = 0;
@@ -46,11 +47,12 @@ void exec_chmod()
     }
 
     current->permission = atoi(values.ugo);
-    if (current->type == _DIRECTORY_TYPE_)
+    updateInode(no_inode, current);
+    if (current->type == _DIRECTORY_TYPE_ && values.recursive)
         fs_traversalTree(current, command, atoi(values.ugo));
     
-    updateInode(no_inode, current);
-    fs_backup(journal);
+    if (command != _RECOVERY_)
+        fs_backup(journal);
 
     printf(ANSI_COLOR_GREEN "[i] Se cambio permisos a %s\n" ANSI_COLOR_RESET, journal->str_1);
 }

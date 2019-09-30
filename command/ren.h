@@ -40,7 +40,8 @@ void exec_ren()
         DirectoryBlock * db = (DirectoryBlock *) getGenericBlock(no_block, _DIRECTORY_TYPE_);
         strcpy(db->content[ptr_inodo].name, values.name);
         updateGenericBlock(no_block, db);
-        fs_backup(journal);
+        if (command != _RECOVERY_)
+            fs_backup(journal);
         printf(ANSI_COLOR_GREEN "[i] Se cambió el nombre de %s a %s\n" ANSI_COLOR_RESET, journal->str_1, journal->str_2);
     }
     else

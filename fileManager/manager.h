@@ -13,6 +13,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "../var/globals.h"
 
@@ -278,6 +279,11 @@ int updateInode(int n, Inode * in)
 
     FILE * file;
     file = fopen(session.path, "rb+");
+
+    __time_t currentDate = time(NULL);
+    struct tm * date = localtime(&currentDate);
+    strftime(in->modified_date, sizeof(in->modified_date), "%d/%m/%y %H:%M", date);
+    strftime(in->last_date, sizeof(in->last_date), "%d/%m/%y %H:%M", date);
 
     if (file != NULL)
     {
