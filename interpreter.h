@@ -31,6 +31,9 @@
 #include "command/mkfile.h"
 #include "command/cat.h"
 #include "command/chgrp.h"
+#include "command/edit.h"
+#include "command/chmod.h"
+#include "command/ren.h"
 #include "command/loss.h"
 #include "command/recovery.h"
 
@@ -397,6 +400,15 @@ int loadCommand(char input[])
             break;
         case _CHGRP_:
             exec_chgrp();
+            break;
+        case _CHMOD_:
+            exec_chmod();
+            break;
+        case _EDIT_:
+            exec_edit();
+            break;
+        case _REN_:
+            exec_ren();
             break;
         case _LOSS_:
             exec_loss();

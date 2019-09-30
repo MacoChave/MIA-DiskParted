@@ -430,7 +430,7 @@ void reportInodes()
 
 void reportBlocks_Indirect(FILE * file, int no_current, PointerBlock * current, int type, int level)
 {
-        for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 16; i++)
     {
         if (current->pointers[i] < 0) continue;
 
@@ -440,7 +440,7 @@ void reportBlocks_Indirect(FILE * file, int no_current, PointerBlock * current, 
 
             fprintf(file, "\tBLOCK_%d [\n", pb->pointers[i]);
             fprintf(file, "\t\tlabel = <\n");
-            fprintf(file, "\t\t\t<table bgcolor = \"teal\">\n");
+            fprintf(file, "\t\t\t<table bgcolor = \"slateblue\">\n");
             
             fprintf(file, "\t\t\t\t<tr>\n");
             fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", pb->pointers[i]);
@@ -457,7 +457,7 @@ void reportBlocks_Indirect(FILE * file, int no_current, PointerBlock * current, 
             fprintf(file, "\t\t>\n");
             fprintf(file, "\t]\n");
             
-            reportTree_Indirect(file, current->pointers[i], pb, type, level - 1);
+            reportBlocks_Indirect(file, current->pointers[i], pb, type, level - 1);
         }
         else 
         {
@@ -536,7 +536,7 @@ void reportBlocks()
         {
             if (current->block[j] < 0) continue;
 
-            if (i < 12)
+            if (j < 12)
             {
                 if (current->type == _FILE_TYPE_)
                 {
@@ -665,7 +665,7 @@ void reportTree_Indirect(FILE * file, int no_current, PointerBlock * current, in
 
             fprintf(file, "\tBLOCK_%d [\n", pb->pointers[i]);
             fprintf(file, "\t\tlabel = <\n");
-            fprintf(file, "\t\t\t<table bgcolor = \"teal\">\n");
+            fprintf(file, "\t\t\t<table bgcolor = \"slateblue\">\n");
             
             fprintf(file, "\t\t\t\t<tr>\n");
             fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", pb->pointers[i]);
@@ -1067,7 +1067,9 @@ void reportSuperBlock()
 void reportFile()
 {
     char dotfile[25] = "file_report.md";
-    int no_inode = fs_getDirectoryByPath(values.ruta, __READ__);
+    int no_block = 0;
+    int ptr_inodo = 0;
+    int no_inode = fs_getDirectoryByPath(values.ruta, __READ__, &no_block, &ptr_inodo);
     Inode * current = getInode(no_inode);
     char * text = fs_readFile(current);
 
@@ -1156,7 +1158,9 @@ void reportLs_indirect(FILE * file, PointerBlock * current, int level)
 void reportLs()
 {
     int level = 1;
-    int no_current = fs_getDirectoryByPath(values.ruta, __READ__);
+    int no_block = 0;
+    int ptr_inodo = 0;
+    int no_current = fs_getDirectoryByPath(values.ruta, __READ__, &no_block, &ptr_inodo);
     if (no_current < 0)
     {
         printf(ANSI_COLOR_RED "[e] No posee permisos para comando LS\n" ANSI_COLOR_RESET);

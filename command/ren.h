@@ -25,10 +25,27 @@ void exec_ren()
     strcpy(journal->str_2, values.name);
     journal->owner = session.id_user;
 
-    int no_current = fs_getDirectoryByPath(values.path, __UPDATE__);
-    if (no_current <= 0)
+    int no_block = 0;
+    int ptr_inodo = 0;
+    int no_current = fs_getDirectoryByPath(values.path, __UPDATE__, &no_block, &ptr_inodo);
+    if (no_current <= 0 && no_block < 0 && ptr_inodo < 0)
     {
         printf(ANSI_COLOR_RED "[e] No hay acceso al directorio\n" ANSI_COLOR_RESET);
+        return;
+    }
+
+    Inode * current = getInode(no_current);
+    if (fs_checkPermission(current->uid, current->gid, current->permission, __UPDATE__))
+    {
+        DirectoryBlock * db = (DirectoryBlock *) getGenericBlock(no_block, _DIRECTORY_TYPE_);
+        strcpy(db->content[ptr_inodo].name, values.name);
+        updateGenericBlock(no_block, db);
+        fs_backup(journal);
+        printf("[i] Se cambió el nombre de %s a %s\n", journal->str_1, journal->str_2);
+    }
+    else
+    {
+        printf("[e] No posee permisos sobre el archivo\n");
         return;
     }
 }

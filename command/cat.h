@@ -19,7 +19,9 @@ void exec_cat()
         return;
     }
     
-    int no_current = fs_getDirectoryByPath(values.file, __READ__);
+    int no_block = 0;
+    int ptr_inodo = 0;
+    int no_current = fs_getDirectoryByPath(values.file, __READ__, &no_block, &ptr_inodo);
     Inode * current = getInode(no_current);
     char * text = fs_readFile(current);
 

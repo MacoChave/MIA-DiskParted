@@ -7,6 +7,8 @@
 #include "../var/globals.h"
 #include "../fileManager/manager.h"
 
+extern void fs_traversalTree(Inode * current, int command, int ugo);
+
 /**
  * @brief Leer archivo de texto en sistema de archivos en apuntadores indirectos
  * 
@@ -324,15 +326,15 @@ void fs_pushContent(char content[], Inode * current, int no_current)
  * @param level 
  * @return int 
  */
-int fs_getDirectoryByName_Indirect(char name[], PointerBlock * bp, int level)
+int fs_getDirectoryByName_Indirect(char name[], PointerBlock * bp, int level, int * no_block, int * ptr_inodo)
 {
     int no_inode = -1;
     for (int i = 0; i < 16; i++)
     {
         if (bp->pointers[i] < 0) continue;
         if (level > 1){
-            no_inode = fs_getDirectoryByName_Indirect(name, bp, level - 1);
-            if (no_inode > 0) return no_inode;
+            no_inode = fs_getDirectoryByName_Indirect(name, bp, level - 1, no_block, ptr_inodo);
+            if (no_inode > 0) return no_inode; 
             else continue;
         }
     
@@ -341,7 +343,11 @@ int fs_getDirectoryByName_Indirect(char name[], PointerBlock * bp, int level)
         {
             if (bd->content[j].inode < 0) continue;
             if (strcmp(name, bd->content[j].name) == 0)
+            {
+                *no_block = bp->pointers[i];
+                *ptr_inodo = j;
                 return bd->content[j].inode;
+            }
         }
     }
     return no_inode;
@@ -354,7 +360,7 @@ int fs_getDirectoryByName_Indirect(char name[], PointerBlock * bp, int level)
  * @param current 
  * @return int 
  */
-int fs_getDirectoryByName(char name[], Inode * current)
+int fs_getDirectoryByName(char name[], Inode * current, int * no_block, int * ptr_inodo)
 {
     int no_inode = -1;
     int level = 1;
@@ -370,14 +376,18 @@ int fs_getDirectoryByName(char name[], Inode * current)
             {
                 if (bd->content[j].inode < 0) continue;
                 if (strcmp(name, bd->content[j].name) == 0)
+                {
+                    *no_block = current->block[i];
+                    *ptr_inodo = j;
                     return bd->content[j].inode;
+                }
             }
         }
         else
         {
             /*  BLOQUES INDIRECTOS */
             PointerBlock * bp = (PointerBlock *) getGenericBlock(current->block[i], _POINTER_TYPE_);
-            no_inode = fs_getDirectoryByName_Indirect(name, bp, level);
+            no_inode = fs_getDirectoryByName_Indirect(name, bp, level, no_block, ptr_inodo);
             if (no_inode > 0)
                 return no_inode;
             level++;
@@ -765,6 +775,8 @@ int fs_createDirectoryFromPath(char path[], int isRecursive, char inodeType, cha
     int lenght_path = strlen(path);
     int no_container = 0;
     int no_next = 0;
+    int no_block = 0;
+    int ptr = 0;
     char * str_path = NULL;
     Inode * current = getInode(0);
     str_path = strtok(path, "/");
@@ -774,7 +786,7 @@ int fs_createDirectoryFromPath(char path[], int isRecursive, char inodeType, cha
         pivot += strlen(str_path) + 1;
         no_container = no_next;
         int hasPermission = fs_checkPermission(current->uid, current->gid, current->permission, operation);
-        no_next = fs_getDirectoryByName(str_path, current);
+        no_next = fs_getDirectoryByName(str_path, current, &no_block, &ptr);
         if (no_next < 0)
         {
             if (isRecursive || (operation == __CREATE__ && pivot == lenght_path))
@@ -811,7 +823,7 @@ int fs_createDirectoryFromPath(char path[], int isRecursive, char inodeType, cha
  * @param operation 
  * @return int 
  */
-int fs_getDirectoryByPath(char path[], char operation)
+int fs_getDirectoryByPath(char path[], char operation, int * no_block, int * ptr_inodo)
 {
     int pivot = 0;
     int lenght_path = strlen(path);
@@ -826,7 +838,7 @@ int fs_getDirectoryByPath(char path[], char operation)
         pivot += strlen(str_path) + 1;
         no_container = no_next;
         int hasPermission = fs_checkPermission(current->uid, current->gid, current->permission, operation);
-        no_next = fs_getDirectoryByName(str_path, current);
+        no_next = fs_getDirectoryByName(str_path, current, no_block, ptr_inodo);
         if (no_next < 0) return -1;
         if (pivot == lenght_path) return no_next;
         if (!hasPermission && no_container != 0) return -1;
@@ -880,6 +892,79 @@ void fs_updatePermission()
         
         fs_writeFile(text, current, 1, i);
         memset(text, 0, 64);
+    }
+}
+
+void fs_traversalTree_Indirect(PointerBlock * current, int command, int ugo, int level)
+{
+    int result = 0;
+    for (int i = 0; i < 16; i++)
+    {
+        if (level > 1)
+        {
+            if (current->pointers[i] == -1) continue;
+
+            PointerBlock * pb = (PointerBlock *) getGenericBlock(current->pointers[i], _POINTER_TYPE_);
+            fs_traversalTree_Indirect(pb, command, ugo, level);
+        }
+        else 
+        {
+            if (current->pointers[i] == -1) continue;
+            
+            Inode * child = getInode(current->pointers[i]);
+            // TODO: Verificar permisos
+            if(!fs_checkPermission(child->uid, child->gid, child->permission, __UPDATE__))
+                continue;
+
+            // TODO: Cambiar permiso / Copiar carpeta o archivo
+            child->permission = ugo;
+            // TODO: Si es carpeta, entrar el inodo
+            if (child->type == _DIRECTORY_TYPE_)
+                fs_traversalTree(child, command, ugo);
+        }
+    }
+}
+
+void fs_traversalTree(Inode * current, int command, int ugo)
+{
+    int level = 1;
+
+    for (int i = 0; i < 15; i++)
+    {
+        if (i < 12)
+        {
+            /* BLOQUES DIRECTOS */
+            if (current->block[i] == -1) continue;
+            DirectoryBlock * db = (DirectoryBlock *)getGenericBlock(current->block[i], _DIRECTORY_TYPE_);
+            for (int i = 0; i < 4; i++)
+            {
+                if (db->content[i].inode < 0) continue;
+                if (strcmp(db->content[i].name, ".") == 0) continue;
+                if (strcmp(db->content[i].name, "..") == 0) continue;
+
+                Inode * child = getInode(db->content[i].inode);
+                // TODO: Verificar permisos
+                if(!fs_checkPermission(child->uid, child->gid, child->permission, __UPDATE__))
+                    continue;
+
+                // TODO: Cambiar permiso / Copiar carpeta o archivo
+                child->permission = ugo;
+                // TODO: Si es carpeta, entrar el inodo
+                if (child->type == _DIRECTORY_TYPE_)
+                    fs_traversalTree(child, command, ugo);
+            }
+        }
+        else 
+        {
+            /* BLOQUES INDIRECTOS */
+            if (current->block[i] == -1) continue;
+
+            PointerBlock * pb = NULL;
+            pb = (PointerBlock *) getGenericBlock(current->block[i], _POINTER_TYPE_);
+            fs_traversalTree_Indirect(pb, command, ugo, level);
+
+            level++;
+        }
     }
 }
 
