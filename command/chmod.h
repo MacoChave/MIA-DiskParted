@@ -50,6 +50,8 @@ void exec_chmod()
     // TODO: Si es carpeta, entrar el inodo
     if (current->type == _DIRECTORY_TYPE_)
         fs_traversalTree(current, command, atoi(values.ugo));
+    
+    updateInode(no_inode, current);
 
     printf(ANSI_COLOR_GREEN "[e] Se cambio permisos a %s\n" ANSI_COLOR_RESET, journal->str_1);
 }

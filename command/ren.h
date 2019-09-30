@@ -41,11 +41,11 @@ void exec_ren()
         strcpy(db->content[ptr_inodo].name, values.name);
         updateGenericBlock(no_block, db);
         fs_backup(journal);
-        printf("[i] Se cambió el nombre de %s a %s\n", journal->str_1, journal->str_2);
+        printf(ANSI_COLOR_GREEN "[i] Se cambió el nombre de %s a %s\n" ANSI_COLOR_RESET, journal->str_1, journal->str_2);
     }
     else
     {
-        printf("[e] No posee permisos sobre el archivo\n");
+        printf(ANSI_COLOR_GREEN "[e] No posee permisos sobre el archivo\n" ANSI_COLOR_RESET);
         return;
     }
 }

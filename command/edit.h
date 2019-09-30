@@ -20,13 +20,15 @@ void exec_edit()
         return;
     }
 
+    int no_block = 0;
+    int ptr_inodo = 0;
     Journal * journal = newJournal();
     journal->command = _EDIT_;
     strcpy(journal->str_1, values.path);
     strcpy(journal->str_2, values.cont);
     journal->owner = session.id_user;
 
-    int result = fs_createDirectoryFromPath(values.path, 0, _FILE_TYPE_, __UPDATE__);
+    int result = fs_getDirectoryByPath(values.path, __UPDATE__, &no_block, &ptr_inodo);
     if (result < 0)
     {
         printf(ANSI_COLOR_RED "[e] No se pudo obtener el archivo %s\n" ANSI_COLOR_RESET, journal->str_1);

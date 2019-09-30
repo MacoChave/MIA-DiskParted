@@ -87,6 +87,7 @@ char * fs_readFile(Inode * current)
  */
 int fs_writeFile_Indirect(char text[], PointerBlock * current, int no_current, int level)
 {
+    int result = 0;
     for (int i = 0; i < 16; i++)
     {
         if (level > 1)
@@ -106,7 +107,7 @@ int fs_writeFile_Indirect(char text[], PointerBlock * current, int no_current, i
             else 
                 pb = (PointerBlock *)getGenericBlock(current->pointers[i], _POINTER_TYPE_);
             
-            int result = fs_writeFile_Indirect(text, pb, current->pointers[i], level -1);
+            result = fs_writeFile_Indirect(text, pb, current->pointers[i], level -1);
             if (result) return result;
         }
         else 
@@ -129,10 +130,13 @@ int fs_writeFile_Indirect(char text[], PointerBlock * current, int no_current, i
                 updateGenericBlock(current->pointers[i], fb);
             }
 
-            strcpy(fb->content, text);
-            updateGenericBlock(current->pointers[i], fb);
+            if (strlen(fb->content) < 64)
+            {
+                strcpy(fb->content, text);
+                updateGenericBlock(current->pointers[i], fb);
 
-            return 1;
+                return 1;
+            }
         }
         return 0;
     }
@@ -176,23 +180,27 @@ void fs_writeFile(char text[], Inode * current, int no_current, int i)
     else 
     {
         /* BLOQUES INDIRECTOS */
-        PointerBlock * pb = NULL;
-        if (current->block[i] == -1)
+        int result = 0;
+        while (!result && level < 4)
         {
-            pb = newPointerBlock();
-            current->block[i] = session.sb->first_block;
-            updateInode(no_current, current);
-            updateGenericBlock(current->block[i], pb);
-            updateBitmap(current->block[i], '1', _BLOCK_);
-            session.sb->free_blocks -= 1;
-            session.sb->first_block = getNextFreeBit_Bitmap(_BLOCK_);
-            updateSuperBlock();
-        }
-        else 
-            pb = (PointerBlock *)getGenericBlock(current->block[i], _POINTER_TYPE_);
+            PointerBlock * pb = NULL;
+            if (current->block[11 + level] == -1)
+            {
+                pb = newPointerBlock();
+                current->block[11 + level] = session.sb->first_block;
+                updateInode(no_current, current);
+                updateGenericBlock(current->block[11 + level], pb);
+                updateBitmap(current->block[11 + level], '1', _BLOCK_);
+                session.sb->free_blocks -= 1;
+                session.sb->first_block = getNextFreeBit_Bitmap(_BLOCK_);
+                updateSuperBlock();
+            }
+            else 
+                pb = (PointerBlock *)getGenericBlock(current->block[11 + level], _POINTER_TYPE_);
         
-        fs_writeFile_Indirect(text, pb, current->block[i], level);
-        level++;
+            result = fs_writeFile_Indirect(text, pb, current->block[11 + level], level);
+            level++;
+        }
     }
 }
 
@@ -214,7 +222,7 @@ void fs_generateContent_cont(char cont[300], Inode * current, int no_current)
 
     if (file != NULL)
     {
-        while(!feof(file) || i < 12){
+        while(!feof(file)){
             fgets(text, 64, file);
             size += strlen(text);
             if (strlen(text) > 0)
@@ -242,31 +250,27 @@ void fs_generateContent_size(int size, Inode * current, int no_current)
 {
     char text[64] = {0};
     current->size = size;
+    int i = 0;
+    int level = 1;
     int blocks_count = size / 64;
+    
     if (size % 64 > 0)
         blocks_count++;
     
-    for (int i = 0; i < 15; i++)
+    while (i < blocks_count)
     {
-        if (i < blocks_count)
+        for (int j = 0, a = 0; j < 64; j++, a++)
         {
-            for (int j = 0, a = 0; j < 64; j++, a++)
-            {
-                char aux[3] = {a + '0', '\0'};
-                strcat(text, aux);
-                if (a == 9) a = -1;
-            }
+            char aux[3] = {a + '0', '\0'};
+            strcat(text, aux);
+            if (a == 9) a = -1;
+        }
 
-            fs_writeFile(text, current, no_current, i);
-            memset(text, 0, 64);
-        }
-        else
-        {
-            // TODO: Limpiar resto del contenido sin ustilizar
-            
-        }
+        fs_writeFile(text, current, no_current, i);
+        memset(text, 0, 64);
+        i++;
     }
-
+    
     updateInode(no_current, current);
 }
 
@@ -918,6 +922,7 @@ void fs_traversalTree_Indirect(PointerBlock * current, int command, int ugo, int
 
             // TODO: Cambiar permiso / Copiar carpeta o archivo
             child->permission = ugo;
+            updateInode(current->pointers[i], child);
             // TODO: Si es carpeta, entrar el inodo
             if (child->type == _DIRECTORY_TYPE_)
                 fs_traversalTree(child, command, ugo);
@@ -949,6 +954,7 @@ void fs_traversalTree(Inode * current, int command, int ugo)
 
                 // TODO: Cambiar permiso / Copiar carpeta o archivo
                 child->permission = ugo;
+                updateInode(db->content[i].inode, child);
                 // TODO: Si es carpeta, entrar el inodo
                 if (child->type == _DIRECTORY_TYPE_)
                     fs_traversalTree(child, command, ugo);

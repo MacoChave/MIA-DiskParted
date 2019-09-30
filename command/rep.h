@@ -668,11 +668,13 @@ void reportTree_Indirect(FILE * file, int no_current, PointerBlock * current, in
             fprintf(file, "\t\t\t<table bgcolor = \"slateblue\">\n");
             
             fprintf(file, "\t\t\t\t<tr>\n");
-            fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", pb->pointers[i]);
+            fprintf(file, "\t\t\t\t\t<td>BLock %d</td>\n", pb->pointers[i]);
             fprintf(file, "\t\t\t\t</tr>\n");
 
             for (int z = 0; z < 16; z++)
             {
+                if (pb->pointers[z] < 0) continue;
+
                 fprintf(file, "\t\t\t\t<tr>\n");
                 fprintf(file, "\t\t\t\t\t<td port = '%d'>%d</td>\n", z, pb->pointers[z]);
                 fprintf(file, "\t\t\t\t</tr>\n");
@@ -695,6 +697,8 @@ void reportTree_Indirect(FILE * file, int no_current, PointerBlock * current, in
         {
             for (int j = 0; j < 15; j++)
             {
+                if (current->pointers[j] < 0) continue;
+
                 fprintf(file, "\n\tBLOCK_%d : %d -> BLOCK_%d\n\n", no_current, j, current->pointers[j]);
 
                 if (type == _FILE_TYPE_)
@@ -731,6 +735,8 @@ void reportTree_Indirect(FILE * file, int no_current, PointerBlock * current, in
 
                     for (int z = 0; z < 4; z++)
                     {
+                        if (bd->content[z].inode < 0) continue;
+
                         fprintf(file, "\t\t\t\t<tr>\n");
                         fprintf(file, "\t\t\t\t\t<td>%s</td>\n", bd->content[z].name);
                         fprintf(file, "\t\t\t\t\t<td port = '%d'>%d</td>\n", z, bd->content[z].inode);
@@ -743,8 +749,9 @@ void reportTree_Indirect(FILE * file, int no_current, PointerBlock * current, in
 
                     for (int z = 0; z < 4; z++)
                     {
-                        if (bd->content[z].inode == -1) continue;
-                        if (bd->content[z].name[0] == '.') continue;
+                        if (bd->content[z].inode < 0) continue;
+                        if (strcmp(bd->content[z].name, ".") == 0) continue;
+                        if (strcmp(bd->content[z].name, "..") == 0) continue;
 
                         fprintf(file, "\n\tBLOCK_%d : %d -> INODE_%d\n", current->pointers[j], z, bd->content[z].inode);
                     }
@@ -895,7 +902,8 @@ void reportTree()
                     for (int z = 0; z < 4; z++)
                     {
                         if (bd->content[z].inode == -1) continue;
-                        if (bd->content[z].name[0] == '.') continue;
+                        if (strcmp(bd->content[z].name, ".") == 0) continue;
+                        if (strcmp(bd->content[z].name, "..") == 0) continue;
 
                         fprintf(file, "\n\tBLOCK_%d : %d -> INODE_%d\n", current->block[j], z, bd->content[z].inode);
                     }
@@ -910,11 +918,13 @@ void reportTree()
                 fprintf(file, "\t\t\t<table bgcolor = \"skyblue\">\n");
                 
                 fprintf(file, "\t\t\t\t<tr>\n");
-                fprintf(file, "\t\t\t\t\t<td colspan = \"2\">BLock %d</td>\n", current->block[j]);
+                fprintf(file, "\t\t\t\t\t<td>BLock %d</td>\n", current->block[j]);
                 fprintf(file, "\t\t\t\t</tr>\n");
 
                 for (int z = 0; z < 4; z++)
                 {
+                    if (pb->pointers[z] < 0) continue;
+
                     fprintf(file, "\t\t\t\t<tr>\n");
                     fprintf(file, "\t\t\t\t\t<td port = '%d'>%d</td>\n", z, pb->pointers[z]);
                     fprintf(file, "\t\t\t\t</tr>\n");
