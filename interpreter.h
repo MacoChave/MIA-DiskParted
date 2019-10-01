@@ -34,6 +34,8 @@
 #include "command/edit.h"
 #include "command/chmod.h"
 #include "command/ren.h"
+#include "command/rem.h"
+#include "command/mv.h"
 #include "command/loss.h"
 #include "command/recovery.h"
 
@@ -409,6 +411,12 @@ int loadCommand(char input[])
             break;
         case _REN_:
             exec_ren();
+            break;
+        case _REM_:
+            exec_rem();
+            break;
+        case _MV_:
+            exec_mv();
             break;
         case _LOSS_:
             exec_loss();

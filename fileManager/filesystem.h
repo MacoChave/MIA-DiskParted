@@ -8,6 +8,7 @@
 #include "../fileManager/manager.h"
 
 extern void fs_traversalTree(Inode * current, int command, int ugo);
+extern int fs_traversalModify(Inode * current, int operation);
 
 /**
  * @brief Leer archivo de texto en sistema de archivos en apuntadores indirectos
@@ -320,6 +321,123 @@ void fs_pushContent(char content[], Inode * current, int no_current)
          * 34
          */
     }
+}
+
+int fs_pushDirectory_Indirect(char name[], int no_inode, PointerBlock * current, int no_current, int level)
+{
+    int result = -1;
+
+    for (int i = 0; i < 16; i++)
+    {
+        if (level > 1)
+        {
+            PointerBlock * new_bp = newPointerBlock();
+            if (current->pointers[i] == -1)
+            {
+                current->pointers[i] = session.sb->first_block;
+                updateGenericBlock(no_current, current);
+                updateGenericBlock(_EMPTY_, new_bp);
+                updateBitmap(current->pointers[i], '1', _BLOCK_);
+                session.sb->free_blocks -= 1;
+                session.sb->first_block = getNextFreeBit_Bitmap(_BLOCK_);
+                updateSuperBlock();
+            }
+            else
+                new_bp = (PointerBlock *) getGenericBlock(current->pointers[i], _POINTER_TYPE_);
+
+            result = fs_pushDirectory_Indirect(name, no_inode, new_bp, current->pointers[i], level - 1);
+            if (result > 0) return result;
+        }
+        else
+        {
+            DirectoryBlock * bd = newDirectoryBlock(_EMPTY_, _EMPTY_);
+            if (current->pointers[i] == -1)
+            {
+                current->pointers[i] = session.sb->first_block;
+                updateGenericBlock(no_current, current);
+                updateGenericBlock(_EMPTY_, bd);
+                updateBitmap(current->pointers[i], '1', _BLOCK_);
+                session.sb->free_blocks -= 1;
+                session.sb->first_block = getNextFreeBit_Bitmap(_BLOCK_);
+                updateSuperBlock();
+            }
+            else
+                bd = (DirectoryBlock *) getGenericBlock(current->pointers[i], _DIRECTORY_TYPE_);
+            
+            for (int j = 0; j < 4; j++)
+            {
+                if (bd->content[j].inode < 0)
+                {
+                    bd->content[j].inode = no_inode;
+                    strcpy(bd->content[j].name, name);
+                    updateGenericBlock(current->pointers[i], bd);
+                    return bd->content[j].inode;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+int fs_pushDirectory(char name[], int no_inode, Inode * current, int no_current)
+{
+    int no_next = -1;
+    int level = 1;
+
+    for (int i = 0; i < 15; i++)
+    {
+        if (i < 12)
+        {
+            /* BLOQUES DIRECTOS */
+            DirectoryBlock * bd = newDirectoryBlock(_EMPTY_, _EMPTY_);
+            if (current->block[i] == -1)
+            {
+                current->block[i] = session.sb->first_block;
+                updateInode(no_current, current);
+                updateGenericBlock(_EMPTY_, bd);
+                updateBitmap(current->block[i], '1', _BLOCK_);
+                session.sb->free_blocks -= 1;
+                session.sb->first_block = getNextFreeBit_Bitmap(_BLOCK_);
+            }
+            else
+                bd = (DirectoryBlock *) getGenericBlock(current->block[i], _DIRECTORY_TYPE_);
+            
+            for (int j = 0; j < 4; j++)
+            {
+                if (bd->content[j].inode < 0)
+                {
+                    bd->content[j].inode = no_inode;
+                    strcpy(bd->content[j].name, name);
+                    updateGenericBlock(current->block[i], bd);
+                 
+                    return bd->content[j].inode;
+                }
+            }
+        }
+        else
+        {
+            PointerBlock * bp = newPointerBlock();
+            if (current->block[i] == -1)
+            {
+                current->block[i] = session.sb->first_block;
+                updateInode(no_current, current);
+                updateGenericBlock(_EMPTY_, bp);
+                updateBitmap(current->block[i], '1', _BLOCK_);
+                session.sb->free_blocks -= 1;
+                session.sb->first_block = getNextFreeBit_Bitmap(_BLOCK_);
+                updateSuperBlock();
+            }
+            else
+                bp = (PointerBlock *) getGenericBlock(current->block[i], _POINTER_TYPE_);
+            
+            no_next = fs_pushDirectory_Indirect(name, no_inode, bp, current->block[i], level);
+            if (no_next > 0)
+                return no_next;
+            level++;
+        }
+    }
+
+    return no_next;
 }
 
 /**
@@ -916,16 +1034,18 @@ void fs_traversalTree_Indirect(PointerBlock * current, int command, int ugo, int
             if (current->pointers[i] == -1) continue;
             
             Inode * child = getInode(current->pointers[i]);
-            // TODO: Verificar permisos
             if(!fs_checkPermission(child->uid, child->gid, child->permission, __UPDATE__))
                 continue;
-
-            // TODO: Cambiar permiso / Copiar carpeta o archivo
-            child->permission = ugo;
+            
+            if (command == _CHMOD_)
+                child->permission = ugo;
             updateInode(current->pointers[i], child);
-            // TODO: Si es carpeta, entrar el inodo
             if (child->type == _DIRECTORY_TYPE_)
                 fs_traversalTree(child, command, ugo);
+            if (command == _REM_)
+            {
+                updateBitmap(current->pointers[i], '0', _INODE_);
+            }
         }
     }
 }
@@ -948,16 +1068,19 @@ void fs_traversalTree(Inode * current, int command, int ugo)
                 if (strcmp(db->content[i].name, "..") == 0) continue;
 
                 Inode * child = getInode(db->content[i].inode);
-                // TODO: Verificar permisos
                 if(!fs_checkPermission(child->uid, child->gid, child->permission, __UPDATE__))
                     continue;
-
-                // TODO: Cambiar permiso / Copiar carpeta o archivo
-                child->permission = ugo;
+                
+                if (command == _CHMOD_)
+                    child->permission = ugo;
+                
                 updateInode(db->content[i].inode, child);
-                // TODO: Si es carpeta, entrar el inodo
                 if (child->type == _DIRECTORY_TYPE_)
                     fs_traversalTree(child, command, ugo);
+                if (command == _REM_)
+                {
+                    updateBitmap(db->content[i].inode, '0', _INODE_);
+                }
             }
         }
         else 
@@ -972,6 +1095,85 @@ void fs_traversalTree(Inode * current, int command, int ugo)
             level++;
         }
     }
+}
+
+int fs_traversalModify_Indirect(PointerBlock * current, int level, int operation)
+{
+    int response = 1;
+
+    for (int i = 0; i < 16; i++)
+    {
+        if (current->pointers[i] == -1) continue;
+
+        if (level > 1)
+        {
+            PointerBlock * pb = (PointerBlock *) getGenericBlock(current->pointers[i], _POINTER_TYPE_);
+            response = fs_traversalModify_Indirect(pb, level -1, operation);
+            if (!response) return response;
+        }
+        else 
+        {
+            DirectoryBlock * db = (DirectoryBlock *)getGenericBlock(current->pointers[i], _DIRECTORY_TYPE_);
+            for (int j = 0; j < 4; j++)
+            {
+                if (db->content[j].inode < 0) continue;
+                if (strcmp(db->content[j].name, ".") == 0) continue;
+                if (strcmp(db->content[j].name, "..") == 0) continue;
+
+                Inode * child = getInode(db->content[j].inode);
+                response = fs_checkPermission(child->uid, child->gid, child->permission, operation);
+                if (!response) return response;
+                if (child->type == _FILE_TYPE_) continue;
+
+                response = fs_traversalModify(child, operation);
+                if (!response) return response;
+            }
+        }
+    }
+    return response;
+}
+
+int fs_traversalModify(Inode * current, int operation)
+{
+    int response = 1;
+    int level = 1;
+
+    for (int i = 0; i < 15; i++)
+    {
+        if (current->block[i] == -1) continue;
+        
+        if (i < 12)
+        {
+            /* BLOQUES DIRECTOS */
+            DirectoryBlock * db = (DirectoryBlock *)getGenericBlock(current->block[i], _DIRECTORY_TYPE_);
+            for (int j = 0; j < 4; j++)
+            {
+                if (db->content[j].inode < 0) continue;
+                if (strcmp(db->content[j].name, ".") == 0) continue;
+                if (strcmp(db->content[j].name, "..") == 0) continue;
+
+                Inode * child = getInode(db->content[j].inode);
+                
+                response = fs_checkPermission(child->uid, child->gid, child->permission, operation);
+                if (!response) return response;
+                if (child->type == _FILE_TYPE_) continue;
+
+                response = fs_traversalModify(child, operation);
+                if (!response) return response;
+            }
+        }
+        else 
+        {
+            /* BLOQUES INDIRECTOS */
+            PointerBlock * pb = (PointerBlock *) getGenericBlock(current->block[i], _POINTER_TYPE_);
+            response = fs_traversalModify_Indirect(pb, level, operation);
+            if (!response) return response;
+
+            level++;
+        }
+    }
+
+    return response;
 }
 
 void fs_backup(Journal * journal)

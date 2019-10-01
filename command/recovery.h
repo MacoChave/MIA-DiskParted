@@ -13,6 +13,8 @@
 #include "chmod.h"
 #include "edit.h"
 #include "ren.h"
+#include "mv.h"
+#include "rem.h"
 
 void recovery_struct()
 {
@@ -147,6 +149,27 @@ void extractJournal()
                 initPermissionlist();
                 fillUsersTable();
                 exec_ren();
+                break;
+            }
+            case _MV_:
+            {
+                session.id_user = current->owner;
+                getIdGroup();
+                strcpy(values.path, current->str_1);
+                strcpy(values.dest, current->str_2);
+                initPermissionlist();
+                fillUsersTable();
+                exec_mv();
+                break;
+            }
+            case _REM_:
+            {
+                session.id_user = current->owner;
+                getIdGroup();
+                strcpy(values.path, current->str_1);
+                initPermissionlist();
+                fillUsersTable();
+                exec_rem();
                 break;
             }
             default:
